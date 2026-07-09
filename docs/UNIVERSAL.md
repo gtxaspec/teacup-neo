@@ -104,18 +104,18 @@ Hard SI rules (why the interposer can't just draw everything across the edge):
 - **Decoupling is mandatory on the interposer**, within mm of the SoC balls,
   vias straight to plane. A cap behind the connector's per-pin inductance is
   useless above a few MHz.
-- **Sensor MIPI defaults to the interposer — but it *can* cross the socket** (this
-  is a preference, not a hard rule; don't conflate it with the clock below). D-PHY
-  here is 1.5 Gbps/lane (T33/T40) to 2 Gbps/lane (T41), and **both candidate sockets
-  are qualified well past that** — DDR4 SO-DIMM passes DDR4-3200 (~1.6 GHz
-  differential DQS + 3.2 GT/s DQ); MXM3 carries 8 GT/s PCIe Gen3. Crossing is fine
-  with flanking-ground pairs + length match. We still default the camera FFC to the
-  interposer for three non-physics reasons: **(1)** zero carrier pins — a dual 2-lane
-  sensor is 12 hs signals + grounds, the single biggest pin draw (§10); **(2)** it
-  avoids inserting socket discontinuities into the channel; **(3)** the sensor
-  topology is SoC-specific (dual-MIPI vs MIPI+DVP vs single). A **carrier-side single
-  2-lane MIPI FFC** — the common denominator every SoC has — is a valid option if
-  baseboard-mounted cameras are wanted.
+- **Sensor MIPI crosses the socket to carrier camera FFC(s) — and it's budgeted.**
+  §8 already puts **2× CSI (dual 2-lane MIPI) in the 260 superset** on a carrier FFC,
+  with ~65 grounds to spare — so cameras on the carrier is the default, not a pin
+  problem. It crosses fine: D-PHY here is 1.5 Gbps/lane (T33/T40) to 2 Gbps/lane
+  (T41), and **both sockets are qualified well past that** — DDR4 SO-DIMM passes
+  DDR4-3200 (~1.6 GHz differential DQS + 3.2 GT/s DQ), MXM3 carries 8 GT/s PCIe Gen3
+  — with flanking-ground pairs + length match. An interposer **may also** carry its
+  own camera FFC (optional) for a self-contained mode-A module or the shortest
+  sensor channel, but — unlike the clock below — it is **not required** to stay local.
+  The only config that overflows 260 is dual 2-lane MIPI **plus** a full 16-bit DVP
+  broken out simultaneously (+~36 pins) — which no single SoC implements (§10); the
+  UDIMM-288 / MXM3-314 options exist for that phantom case.
 - **Clock stays on the interposer — this one is a hard rule** (unlike MIPI above).
   EXCLK_XIN/XOUT are **high-Z analog oscillator nodes**; socket stub capacitance
   detunes the crystal loop and kills 24 MHz startup margin. Different mechanism from
@@ -325,7 +325,8 @@ committed`:
 So **260 pins clears the *full* superset** (incl. A1 video) with ~65 grounds —
 enough for 1.5 Gbps MIPI + 125 MHz RGMII. 314 just buys spare grounds we don't
 strictly need. The only thing that would exceed 260 is a 1-GND-per-signal scheme
-(overkill at our speeds) or dual-CSI+DVP16 simultaneous (+~36, deferred §10).
+(overkill at our speeds) or dual-CSI+DVP16 simultaneous (+~36) — a combo no single
+SoC implements, and the UDIMM-288 / MXM3-314 options cover it if ever real (§10).
 **Escape valve:** A1 (video-out) and the T-cameras never share an interposer, so
 their mutually-exclusive peripherals can occupy the **same** connector positions
 if it ever gets tight. No single
@@ -432,7 +433,7 @@ handful of the 260 positions, already part of the SoC signal set (§8).
 **Deferred (decide later):** none outstanding.
 
 **Decided:**
-- **Multi-sensor is family-wide; camera FFC defaults to the interposer (was
+- **Multi-sensor is family-wide; cameras live on the carrier and fit in 260 (was
   deferred).** Datasheet-verified MIPI-RX D-PHY per SoC:
   - **T32** — 4 data + **2 clock** lanes (CLKP0+CLKP1) = **dual 2-lane** (or one
     4-lane) **+ DVP** (muxed onto the CSI pins). Dual-MIPI *or* MIPI+DVP.
@@ -444,15 +445,18 @@ handful of the 260 positions, already part of the SoC signal set (§8).
     and the **QFN96 has none** → our teacup-neo T41 is single-sensor by silicon, and
     T41's "dual" is MIPI+DVP on BGA only. T41 is the *weakest* multi-sensor part here.
 
-  Two consequences: (a) the interface varies too much to hardwire one carrier
-  superset (dual-MIPI vs MIPI+DVP vs single), and (b) a dual 2-lane sensor is ~12
-  high-speed signals + flanking grounds — the pin draw that flagged "past 260." So
-  the camera FFC(s) **default to the interposer** = per-module stuffing (dual-sensor
-  module = 2 FFC) at **zero carrier-pin cost**. This is a *preference, not physics*:
-  the sockets pass 1.5–2 Gbps D-PHY fine (§2), so a **carrier-side single 2-lane MIPI
-  FFC** (the 2-lane subset every SoC has) remains an available option. Carrier supplies
-  sensor power (budgeted 3.3/1.8) + SCCB = plain I²C; §8's breakout also exposes the
-  raw 2-lane MIPI for a carrier-side jumper.
+  **Pin budget (§8):** dual 2-lane MIPI = 2× CSI is **already in the ~180-signal
+  superset**, routed to carrier FFC(s), and 260 clears it with ~65 grounds. So *all
+  the cameras any single SoC can actually run at once* (2 sensors) fit on the carrier
+  in 260 — cameras-on-carrier is the default and MIPI crosses the socket fine (§2).
+  An interposer may *also* host a camera FFC (optional, for a self-contained mode-A
+  module). Carrier supplies sensor power (budgeted 3.3/1.8) + SCCB = plain I²C.
+  **The only overflow case:** dual 2-lane MIPI **+ a full 16-bit DVP broken out
+  simultaneously** (+~36 pins → 260 goes thin on grounds). No single SoC implements
+  that (it's 3 sensors; T40 = "one 4-lane *or* two 2-lane"; **T32/T41 mux DVP onto
+  the CSI pins** so they can't do both) — so it's a phantom requirement. If it ever
+  became real, the **UDIMM-288** (+28 pins → ~57 grounds even with the DVP16) or
+  **MXM3-314** absorbs it; that's what those options are for.
 - **Peripheral 3.3/1.8 + power domains (was open):** carrier-local off the single
   5 V input — the interposer stays SoC-only. Two 5 V domains: an **always-on** rail
   (BMC + its own 3.3 LDO, upstream of the reset gate) and a **switched SoC-5 V** rail
