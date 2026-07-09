@@ -107,9 +107,22 @@ Hard SI rules (why the interposer can't just draw everything across the edge):
 - **Clock stays on the interposer.** EXCLK_XIN/XOUT are high-Z oscillator nodes;
   routing them through fingers + socket kills 24 MHz startup margin. RTC 32.768k
   crystal too, where used.
-- In mode B, the carrier buck should **Kelvin-sense** at the connector and the
-  interposer must carry strong local decoupling to cover connector inductance on
-  the fast core transient.
+- **Mode-B VCORE sense — no analog remote-sense across the connector.** Putting the
+  buck's feedback loop through the socket's finger inductance invites instability,
+  and it costs pins. Instead, a three-part scheme that's DC-accurate *and*
+  loop-stable:
+  1. The carrier buck **Kelvin-senses at the connector** (carrier side) — kills
+     the carrier-trace IR drop, keeps the connector out of the control loop.
+  2. **Parallel several VCORE + GND fingers** so the connector's DC resistance is
+     tiny (≈4 VCORE fingers → ~10 mV drop at 2 A) — within the ±5 % core margin.
+  3. **Strong interposer decoupling** carries the *fast* transient. Above the buck's
+     loop bandwidth (~100s of kHz) no sense scheme helps — that energy can only
+     come from local C, and the connector inductance is why it must be local.
+  4. For the residual DC error and for margining, a high-Z **VCORE_SNS** pin runs
+     from the interposer point-of-load back to the **BMC ADC** (§9): the BMC reads
+     the *true ball voltage* and trims the digipot (§2 above) to hit target —
+     **software remote-sense.** Slow, exact, unconditionally stable, and it's the
+     same measurement voltage-margining already needs. One connector pin.
 
 **Digital voltage control (digipot) — software-set VCORE/VDDR + margining.** In
 mode B, digitize each buck's FB divider with a **dual non-volatile I²C digipot**
@@ -344,7 +357,7 @@ flash) to shave cost; **ESP32-S3-MINI-1** if space-tight.
 
 | Function | Mechanism | Silicon |
 |---|---|---|
-| **Reset** | power-cycle (gate interposer 5 V) — **universal**: T41 QFN96 is **POR-only** (System-Control table = just POR_CTL @ pin 60, no PPRST_ → no reset pin). Optional **PPRST_** GPIO on parts that *have* one (T31 QFN88, all BGA) for a warm reset | **load-switch IC** (TPS22918-class); PPRST_ = GPIO where present |
+| **Reset** | power-cycle the **switched SoC 5 V domain** (drops *every* SoC rail — mode-A local bucks and mode-B carrier VCORE/VDDR/3.3/1.8 — for a true POR; BMC is on the always-on domain, so it survives). **Universal**: T41 QFN96 is **POR-only** (System-Control table = just POR_CTL @ pin 60, no PPRST_ → no reset pin). Optional **PPRST_** GPIO on parts that *have* one (T31 QFN88, all BGA) for a warm reset | **load-switch IC** (TPS22918-class) on the SoC-5V domain; PPRST_ = GPIO where present |
 | **BOOTSEL** (SFC / SD / USB boot) | drive the strap at POR | ESP32 GPIO + 1 K series R |
 | **Flash sharing** (SoC ↔ ESP32) | SoC powered + **BOOTSEL-diverted → SFC is high-Z** ("Hi-Z-rst"); ESP32 owns the shared SPI bus, each master tristates when idle | **just GPIO** (CS + BOOTSEL); a ~6-ch **bus switch is optional** — only to program a fully-*off* SoC |
 | **Flash select** (DIP8 ↔ SOP8) | pick the active CS | ESP32 GPIO |
@@ -400,10 +413,7 @@ handful of the 260 positions, already part of the SoC signal set (§8).
 
 ## 10. Open / deferred / decided
 
-**Open:**
-- **Peripheral 3.3/1.8 source**: carrier-local reg off 5V (keeps interposer
-  SoC-only) — assumed yes; confirm.
-- **VCORE remote-sense** wiring in mode B (transient response).
+**Open:** none outstanding — the two prior items are resolved (below).
 
 **Deferred (decide later):**
 - Whether to break out **dual 4-lane CSI + DVP16 simultaneously** — the one
@@ -411,6 +421,19 @@ handful of the 260 positions, already part of the SoC signal set (§8).
   headroom; revisit if multi-sensor (T40/T41) becomes a target use case.
 
 **Decided:**
+- **Peripheral 3.3/1.8 + power domains (was open):** carrier-local off the single
+  5 V input — the interposer stays SoC-only. Two 5 V domains: an **always-on** rail
+  (BMC + its own 3.3 LDO, upstream of the reset gate) and a **switched SoC-5 V** rail
+  behind one load switch feeding *every* SoC rail — carrier 3.3 (buck ≥2 A) + 1.8
+  (LDO off 3.3, quiet, ~1.5 W at 1 A) + mode-B VCORE/VDDR bucks + the connector 5 V
+  for mode-A interposer bucks. Everything that touches a SoC pin sits on the switched
+  domain, so it all drops together (no ESD back-power into an off SoC) and one gate =
+  a clean POR (§9).
+- **Mode-B VCORE sense (was open):** no analog remote-sense across the connector
+  (finger inductance in the control loop → instability). Kelvin-sense at the connector
+  + paralleled VCORE/GND fingers for DC + mandatory interposer decoupling for the fast
+  transient + a high-Z **VCORE_SNS** pin to the BMC ADC for **software** remote-sense &
+  margining (§2). DC-accurate, unconditionally stable, one connector pin.
 - **Rail table complete (§3)** — every SoC's core/DDR/IO voltages are confirmed
   from datasheets (T20 via the T10 datasheet, same silicon; T30 via its own). The
   one number no datasheet states is T30's exact core *current*, but the ≥3 A
