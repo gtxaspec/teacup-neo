@@ -206,7 +206,7 @@ XBurst2 core requirement is what sets the VCORE size — a T41-only board could 
 
 ---
 
-## 6. Interposer bench bring-up — MVP test pads
+## 6. Test points — interposer MVP + carrier instrumentation
 
 **Directive (CaptainRon):** the interposer should carry the minimum to be a
 **self-contained testable system off the carrier** — just test pads for a minimum
@@ -239,6 +239,25 @@ isolated and injected — per **isolated domain**, not per voltage:
 ~7 rail pads for a fully-isolated interposer; a couple collapse into the chip on
 SIP-QFN parts. A1 (USB ×3 + VGA + HDMI islands) is the worst case for pad count.
 For the MVP, the coarse set (VCORE, VDDR, +1.8, +3.3, +5V, GND) is enough.
+
+**Carrier instrumentation (test points throughout).** Beyond the full signal
+breakout (§8 — every SoC pin at a labeled header, which doubles as a test point):
+- **Power rails** — a labeled probe pad on each carrier rail: +5V, +3.3, +1.8,
+  VCORE, VDDR.
+- **Buck debug** — bring each buck's **SW (LX) node** and **FB node** to a pad, to
+  scope switching ripple / loop behavior during power bring-up.
+- **BMC control lines** — BOOTSEL, reset-EN, flash-select, PPRST_ — pads to observe
+  or manually override the ESP32.
+- **I²C** (digipot + ID EEPROM) — SDA/SCL pads to sniff / bit-bang.
+- **Boot straps** — POR_CTL, BOOT_SEL0 pads on both sides.
+- **Ground everywhere (the one that matters most)** — scatter **GND probe points
+  next to every functional block** (each buck, the SoC/connector, USB, the MIPI
+  FFC, the BMC). A scope's ground lead must be short — long leads ruin high-speed
+  measurements. Cheap and load-bearing.
+
+**Convention:** every test pad **silkscreen-labeled**, one consistent footprint
+(1.0 mm round or a TP part), kept clear of connectors/tall parts so a probe or clip
+reaches it. A well-instrumented board debugs in minutes; a bare one costs hours.
 
 ---
 
