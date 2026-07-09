@@ -295,7 +295,7 @@ cut (USB-Serial-JTAG + WiFi, fewer pins).
 
 | Function | Mechanism | Silicon |
 |---|---|---|
-| **Reset** (QFN = POR-only → power-cycle) | gate the interposer's 5 V | **load-switch IC** (TPS22918-class), ESP32 drives `EN` |
+| **Reset** | power-cycle (gate interposer 5 V) — **universal**: T41 QFN96 is **POR-only** (System-Control table = just POR_CTL @ pin 60, no PPRST_ → no reset pin). Optional **PPRST_** GPIO on parts that *have* one (T31 QFN88, all BGA) for a warm reset | **load-switch IC** (TPS22918-class); PPRST_ = GPIO where present |
 | **BOOTSEL** (SFC / SD / USB boot) | drive the strap at POR | ESP32 GPIO + 1 K series R |
 | **Flash sharing** (SoC ↔ ESP32) | SoC powered + **BOOTSEL-diverted → SFC is high-Z** ("Hi-Z-rst"); ESP32 owns the shared SPI bus, each master tristates when idle | **just GPIO** (CS + BOOTSEL); a ~6-ch **bus switch is optional** — only to program a fully-*off* SoC |
 | **Flash select** (DIP8 ↔ SOP8) | pick the active CS | ESP32 GPIO |
@@ -317,6 +317,17 @@ on-board DC/logic).
 
 Only a fully-*off* SoC (e.g. a bricked part that won't reach USB-boot) needs the
 optional bus switch to isolate its SFC; the normal loop is just CS + BOOTSEL.
+
+**Two flashing paths — the ESP32 triggers both:**
+- **ESP32 direct SPI** (the loop above) — ESP32 writes the NOR itself, **hostless**,
+  agent-over-WiFi. Best for **SPI-NOR** + recovery. It's a raw writer, so NAND is
+  dump-only (no ECC / bad-block handling).
+- **SoC DFU** (bootrom USB boot / `thingino-dfu`) — ESP32 sets BOOTSEL→USB and
+  resets to *enter* DFU; the SoC's own SFC controller then writes via USB from a
+  host, handling **NOR *and* NAND** properly (ECC, bad-block, partitions).
+
+Rule of thumb: **NOR → either; NAND → DFU.** Same control API drives both —
+`flash_nor_direct(img)` (path 1) vs `enter_dfu()` + host (path 2).
 
 So an agent runs **`flash(image)` → `reset()` → `read_console()`** entirely over
 the network — this is what makes "an LLM drives this board" real (same pattern as
