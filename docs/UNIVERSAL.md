@@ -348,10 +348,35 @@ interposer needs every peripheral of every SoC at once.
 **Assign geography-first, not by GPIO bank order:** place the carrier floorplan
 (connector + peripheral connectors), then assign the 260 positions so nets exit
 the socket already pointed at their destination — USB fingers by the USB jacks,
-MIPI pairs by the FFC, MSC0 by the SD slot, GPIO banks by their headers. Rules:
+MIPI pairs by the FFC, MSC0 by the SD slot, audio by the codec block, GPIO banks by
+their headers. Rules:
 - each MIPI pair on **adjacent fingers, same face**, GND finger each side;
 - all high-speed on **one contact row** (escapes on one layer);
 - power pins **clustered** at one end (5V pour is a blob, not a snake).
+
+**Carrier peripheral blocks (camera-SoC support).** §8 breaks out *every* pin, so
+all of these are header-reachable regardless — but a camera bench wants the
+*camera-defining* peripherals wired to real hardware, not just pins. All three below
+are GPIO/analog-muxed pins **already inside the ~180 superset** (no extra budget),
+just given dedicated carrier parts:
+- **Audio.** T-series integrate an **audio CODEC** (T41 QFN96: differential mic in
+  `MICPL/MICNL` + `HPOUTL` out + `VCM` ref; other parts stereo). Carrier: onboard
+  **electret mic → MICPL/MICNL**, **HPOUTL → 3.5 mm jack** (+ small class-D like
+  PAM8302 for a speaker; HP drives phones directly), and **I2S** (`I2S_DAC/ADC_*`) +
+  **DMIC** broken out to headers for external audio. Powered from `CODEC_AVDD` 1.8 V
+  (§3). Note: mic in is **sensitive analog** — keep its socket-crossing trace away
+  from switchers; bench-grade SNR, not audiophile.
+- **PWM / IR-cut / IR-LED** (8 PWM channels, PWM0–7). Carrier: a **PWM-driven IR-cut
+  H-bridge** (bidirectional solenoid) on a 2-pin connector, a **PWM IR-LED driver**
+  (MOSFET/constant-current) header, and spare PWM to a **fan/motor header + test
+  LEDs** (visual PWM feedback). All low-speed digital — cross the socket freely.
+- **JTAG debug header** — `TCK/TMS/TDI/TDO/nRST` to a standard 2×5. Present on
+  **T40 / T31 / most parts; NOT on T41 QFN96** (pin-limited — those positions sit
+  unused for a QFN96 T41 interposer). High-value for low-level bring-up.
+
+Already covered elsewhere: SFC flash (§5), MSC/SD (above), GMAC/USB (§8/§9),
+I²C-SMB (§2 digipot + SCCB), SAR-ADC + eFuse/OTP program pad (§4). SSI/SPI master
+(SSI0/1) stays header-only — app-specific.
 
 ---
 
@@ -511,6 +536,12 @@ handful of the 260 positions, already part of the SoC signal set (§8).
   external-DDR A1 puts DRAM on the interposer. SATA/HDMI are the fastest nets over
   the socket → **build A1 on the UDIMM-288** (coarser pitch + more grounds), 260 ok.
   The carrier's SATA connectors + 2nd RJ45 are **stuffing options** (A1 build only).
+- **Camera-SoC peripheral coverage audited (decided).** Every T-series interface is
+  header-reachable (§8 breaks out all pins); three camera-defining ones get
+  **dedicated carrier hardware** (§8 "Carrier peripheral blocks"): **audio** (codec
+  mic + speaker jack + I2S/DMIC headers), **PWM/IR-cut/IR-LED** (H-bridge + LED
+  driver), and a **JTAG header** (T40/T31/most; not T41 QFN96). All are muxed pins
+  already in the ~180 superset — no pin-budget cost. SSI/SPI master = header-only.
 - This is an **independent design** — the pinout is ours, NOT constrained to be
   mateable with Ingenic's TOMCAT / vendor core-board convention. MXM3 is used
   mechanically only.
