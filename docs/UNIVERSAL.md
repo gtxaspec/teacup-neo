@@ -6,7 +6,7 @@ stops mattering — each SoC's package-specific fanout is absorbed by its module
 which presents a standard edge to a common socket.
 
 - **Interposer** — the per-SoC module: SoC + package fanout + decoupling + clock
-  + (optional) local power + (optional) NOR + straps, presented on a card edge (SO-DIMM-260, §1).
+  + (optional) local power + (optional) NOR + straps, presented on a card edge (DDR4 UDIMM-288, §1).
 - **Carrier** — the universal baseboard: card-edge socket + all peripherals + full
   pin breakout + 5V input + adjustable SoC power.
 
@@ -15,7 +15,7 @@ from some earlier notes — this doc is canonical.)
 
 ---
 
-## 1. Connector: DDR4 card-edge socket (SO-DIMM-260 primary; UDIMM-288 / MXM3-314 options)
+## 1. Connector: DDR4 card-edge socket (UDIMM-288 desktop primary; SO-DIMM-260 compact / MXM3-314 options)
 
 A **card-edge** connector: module side = gold fingers (a fab option, $0 parts),
 socket on the carrier. Chosen over Socket 370 (module needs machined pins — cost
@@ -27,53 +27,61 @@ pad-to-pad routing. We use it **mechanically only** — the pinout is ours (§8)
 **Three viable sockets, all card-edge; the interposer mates whichever the carrier
 footprint targets** (the card is otherwise universal):
 
-| | **DDR4 SO-DIMM-260 (primary)** | **DDR4 UDIMM-288 desktop (option)** | **MXM3-314 (backup premium)** |
+| | **DDR4 UDIMM-288 desktop (primary)** | **DDR4 SO-DIMM-260 (compact option)** | **MXM3-314 (backup premium)** |
 |---|---|---|---|
-| Contacts | 260 | 288 | 314 |
-| Pitch | 0.5 mm | **0.85 mm** (coarsest) | 0.5 mm |
-| Socket length | ~68 mm | **~133 mm** (longest) | ~90 mm |
-| Card thickness | 1.0 mm | ~1.0 mm | 1.2 mm |
-| Cost | ~$0.83–1.67 | **~$0.5–1.5** | ~$10.69–17 |
-| LCSC / JLCPCB | deep, sustained | deep, sustained | last 25, discontinued |
-| Ground headroom | ~65 | ~93 | ~119 |
-| Trade | compact, cheap | coarse pitch + rugged, **big board** | fine pitch, **scarce** |
+| Contacts | 288 | 260 | 314 |
+| Pitch | **0.85 mm** (coarsest, easiest) | 0.5 mm | 0.5 mm |
+| Socket length | ~133 mm (longest) | ~68 mm (compact) | ~90 mm |
+| Card thickness | 1.0 mm | 1.0 mm | 1.2 mm |
+| Cost | ~$1.3–1.9 | ~$0.83–1.67 | ~$10.69–17 |
+| LCSC / JLCPCB | **SMD, 738 stock** (verified) | deep, sustained | last 25, discontinued |
+| Ground headroom | **~93** | ~65 | ~119 |
+| Trade | rugged + coarse + max-ground, **big board** | compact, cheap | fine pitch, **scarce** |
 
-**Why SO-DIMM-260 is primary:** compact (~68 mm), ~$1, **deep sustained LCSC stock**
-(JLCPCB-assemblable — DDR4 laptop-RAM market is enormous), and its 260 pins are
-**enough** (§8: ~180 sig + 15 pwr + 65 gnd).
+**Why UDIMM-288 is primary:** it's the most capable *and* most forgiving — what a
+do-everything bench that must host **A1 + SATA** wants. **0.85 mm pitch** (vs 0.5)
+makes the edge fingers easiest to fab and the contacts most robust; **288 pins →
+~93 grounds**, the headroom that keeps A1's SATA (3 Gbps) + HDMI TMDS and dual
+2-lane MIPI cleanly flanked; a **heavy-duty high-cycle socket** built for constant
+re-insertion; and the bigger card gives the BGA parts (A1 BGA356, T40) room to fan
+out. It's **JLCPCB-assemblable with real stock**: Foxconn **AH58893-T9B10-3F** (LCSC
+C42403003, SMD vertical, 288P, 738 stock, ~$1.3–1.9), premium alt Amphenol FCI
+**DDR4288V0213TF**. Cost: **~133 mm long** — socket + full-width card latch at both
+ends and can't be shortened, so carrier + interposer run ~2× the SO-DIMM footprint.
+That size is the price of the margin.
 
-**DDR4 UDIMM-288 (desktop) — the "coarse-pitch / rugged / max-pins" option.** Real
-upsides: **0.85 mm pitch** (easiest, most forgiving edge fingers + most robust
-contacts), 288 pins (~93 grounds), a heavy-duty high-cycle socket, and it's as
-cheap and LCSC-stocked as SO-DIMM (Foxconn/LOTES 288-pin DDR4 DIMM sockets,
-right-angle *or* vertical). The one cost: **~133 mm long** — the socket *and* the
-full-width card can't be shortened (latches at both ends), so the carrier and
-interposer both roughly double in size vs SO-DIMM. Pick this if you'd rather have a
-larger, rugged benchtop rig with the friendliest fingers than a compact board.
+**SO-DIMM-260 — the compact / JLCPCB-friendly option.** ~68 mm, ~$1, and **the
+deepest, most sustained LCSC stock of the three** (verified thousands: Foxconn
+ASAA821-E8SB0-7H C2925427, AS0A826-H2SB-7H C2761525). Its 260 pins still clear the
+full superset (~180 sig + 15 pwr + 65 gnd, §8), so a **camera-only build** (no A1
+SATA/HDMI) is ideal on 260 — smaller, cheaper, fully JLCPCB-built. Re-spin to this
+when A1 isn't a target.
 
 **MXM3-314 — backup premium.** A fading laptop-GPU part (JAE discontinued, ACES
 0-stock, only 25 on LCSC), kept for when you want max grounds and don't mind
 hand-soldering an Amphenol socket. Fine 0.5 mm pitch, ~90 mm.
 
 All three share the gold-finger edge; only pitch, length, card thickness, and the
-carrier footprint differ — a design can be re-spun between them.
+carrier footprint differ — a design can be re-spun between them (288 default, 260
+for compact camera-only, MXM3 for max-ground).
 
 **Footprints / links:**
-- **DDR4 SO-DIMM Foxconn ASAA821-E8SB0-7H** (183 stock, EasyEDA footprint on LCSC): <https://lcsc.com/product-detail/Memory-Connector-DDR_FOXCONN-ASAA821-E8SB0-7H_C2925427.html>
-- **DDR4 UDIMM-288 desktop** sockets: LCSC "Memory Connector (DDR)" category (Foxconn/LOTES, right-angle + vertical) — exact PN is a quick LCSC filter (DDR4 / DIMM / 288P).
-- MXM3 Amphenol 10151114-001TLF footprint+symbol: <https://www.snapeda.com/search/?q=10151114-001TLF&search-type=parts>
-- MXM3 JAE MM70-314B1-2-R300 on LCSC (last 25): <https://www.lcsc.com/product-detail/C4818180.html>
-- Pick socket **orientation** (right-angle = card lies flat, low-profile) and
-  **stack height** to match the interposer standoff.
+- **DDR4 UDIMM-288 Foxconn AH58893-T9B10-3F** (primary; SMD vertical, 288P, 738 stock, ~$1.3–1.9): <https://www.lcsc.com/product-detail/C42403003.html>
+- **DDR4 UDIMM-288 Amphenol FCI DDR4288V0213TF** (premium alt; Mouser 523-DDR4288V0213TF): <https://www.mouser.com/ProductDetail/523-DDR4288V0213TF>
+- **DDR4 SO-DIMM Foxconn ASAA821-E8SB0-7H** (compact build; EasyEDA footprint on LCSC): <https://lcsc.com/product-detail/Memory-Connector-DDR_FOXCONN-ASAA821-E8SB0-7H_C2925427.html> — also AS0A826-H2SB-7H (C2761525, ~2800 stock)
+- MXM3 Amphenol 10151114-001TLF footprint+symbol: <https://www.snapeda.com/search/?q=10151114-001TLF&search-type=parts>; JAE MM70-314B1-2-R300 (LCSC C4818180, last 25)
+- Pick socket **orientation** (vertical = card stands up, desktop-RAM style; right-angle = card lies flat) and **stack height** to match the interposer standoff.
 
 **Interposer mechanical:**
-- **PCB thickness = 1.0 mm ±0.1** (the SO-DIMM card-edge spec; MXM3 = 1.2 mm).
-  Hard requirement — too thick won't seat / spreads the contacts, too thin =
-  intermittent. It's a standard JLCPCB/PCBWay thickness (4-layer at 1.0 mm is fine).
-- **Edge geometry is fixed by the socket:** the gold-finger row (~130/face at
-  0.5 mm ≈ 65 mm span → ~68 mm card width), the DDR4 **key notch** at the JEDEC
-  position, and the two **side latch cut-outs** so the socket grips + latches.
-  Copy these from the SO-DIMM mechanical drawing.
+- **PCB thickness = 1.0 mm ±0.1** (DDR4 DIMM card-edge spec — same for UDIMM-288 and
+  SO-DIMM-260; MXM3 = 1.2 mm). Hard requirement — too thick won't seat / spreads the
+  contacts, too thin = intermittent. Standard JLCPCB/PCBWay thickness; 4–6 layer at
+  1.0 mm is fine.
+- **Edge geometry is fixed by the socket.** For the **UDIMM-288 primary**: the
+  gold-finger row (144/face at 0.85 mm ≈ 122 mm span → ~133 mm card width), the DDR4
+  **UDIMM key notch** at its JEDEC position (distinct from the SO-DIMM notch), and the
+  **side latch cut-outs**. Copy from the DDR4 UDIMM mechanical drawing. (SO-DIMM-260
+  compact spin: ~130/face at 0.5 mm ≈ 65 mm → ~68 mm card, SO-DIMM notch.)
 - **Depth + component layout are ours** — the card only needs to be as deep
   (~20–30 mm) as fits the SoC island. Put the SoC + tall parts (NOR SOIC ~1.75 mm,
   buck inductor ~1.2 mm, crystal ~0.8 mm) on the **top** face; keep the bottom
@@ -326,19 +334,19 @@ committed`:
 
 | | signals | power | committed | ground (fill) | SI (need ≥1 GND/3 sig) |
 |---|---|---|---|---|---|
-| **SO-DIMM-260**, full superset | ~180 | ~15 | ~195 | **~65** | good (~1 GND/3 sig) |
+| **UDIMM-288 (primary)**, full superset incl A1+SATA | ~180 | ~15 | ~195 | **~93** | very good |
+| SO-DIMM-260, full superset | ~180 | ~15 | ~195 | ~65 | good (~1 GND/3 sig) |
 | SO-DIMM-260, camera-only (no A1) | ~145 | ~15 | ~160 | ~100 | excellent |
-| UDIMM-288 (desktop), full superset | ~180 | ~15 | ~195 | ~93 | very good (option) |
 | MXM3-314, full superset | ~180 | ~15 | ~195 | ~119 | luxurious (backup) |
 
-So **260 pins clears the *full* superset** (incl. full A1 with SATA + dual GbE) with
-~65 grounds. The highest-speed nets crossing the socket are now **A1's dual SATA
-(3 Gbps) + HDMI TMDS** and dual-2-lane MIPI — and grounds are **per-interposer** (only
-one module is ever seated), so those ~65 positions flank whichever SoC's high-speed
-pairs are present with room to spare. **Recommended connector for the A1/SATA build:
-UDIMM-288** (~93 grounds *and* a coarser 0.85 mm pitch that's friendlier to SATA/HDMI
-edge fingers) or MXM3-314 — 260 works, but 288 is the better home for the fastest
-diff pairs. The only thing that truly exceeds 260 is a 1-GND-per-signal scheme
+So the **UDIMM-288 primary clears the full superset** (incl. full A1 with SATA + dual
+GbE) with **~93 grounds** — comfortable for the fastest edge-crossing nets, **A1's
+dual SATA (3 Gbps) + HDMI TMDS** and dual-2-lane MIPI. Grounds are **per-interposer**
+(only one module is ever seated), so those positions flank whichever SoC's high-speed
+pairs are present with wide margin. **SO-DIMM-260 also clears it** (~65 grounds — still
+~1 GND/3 sig, fine) and is the better pick for a **compact camera-only build** (no A1);
+the extra grounds + coarser 0.85 mm pitch are exactly why 288 is primary once A1/SATA
+is in scope. The only thing that truly exceeds even 260 is a 1-GND-per-signal scheme
 (overkill) or dual-CSI+DVP16 simultaneous (+~36) — a combo no single SoC implements.
 **Escape valve:** A1 (video-*out* + SATA/storage) and the T-cameras (video-*in*)
 never share an interposer, so their mutually-exclusive peripherals occupy the **same**
@@ -534,8 +542,14 @@ handful of the 260 positions, already part of the SoC signal set (§8).
   interposer). Unique cost ≈ 28 sig (SATA + 2nd MAC + extra USB) — fits ~180 (§8).
   Use the **A1 SIP-DDR variant** (built-in DDR3L) for a clean small interposer;
   external-DDR A1 puts DRAM on the interposer. SATA/HDMI are the fastest nets over
-  the socket → **build A1 on the UDIMM-288** (coarser pitch + more grounds), 260 ok.
+  the socket — handled by the **UDIMM-288 primary** (§1: ~93 grounds, coarser pitch);
+  a compact 260 camera-build simply doesn't stuff A1.
   The carrier's SATA connectors + 2nd RJ45 are **stuffing options** (A1 build only).
+- **Connector = DDR4 UDIMM-288 desktop, primary (decided).** Foxconn AH58893-T9B10-3F
+  (LCSC C42403003, SMD vertical, 738 stock) or Amphenol FCI DDR4288V0213TF — 0.85 mm
+  pitch + ~93 grounds for the A1 SATA/HDMI high-speed. **SO-DIMM-260** (Foxconn
+  ASAA821, deep stock) is the **compact camera-only** re-spin; **MXM3-314** the
+  max-ground backup. Same gold-finger card, re-spun per connector (§1).
 - **Camera-SoC peripheral coverage audited (decided).** Every T-series interface is
   header-reachable (§8 breaks out all pins); three camera-defining ones get
   **dedicated carrier hardware** (§8 "Carrier peripheral blocks"): **audio** (codec
