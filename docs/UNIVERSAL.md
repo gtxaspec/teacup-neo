@@ -6,8 +6,8 @@ stops mattering — each SoC's package-specific fanout is absorbed by its module
 which presents a standard edge to a common socket.
 
 - **Interposer** — the per-SoC module: SoC + package fanout + decoupling + clock
-  + (optional) local power + (optional) NOR + straps, presented on an MXM3 edge.
-- **Carrier** — the universal baseboard: MXM3 socket + all peripherals + full
+  + (optional) local power + (optional) NOR + straps, presented on a card edge (SO-DIMM-260, §1).
+- **Carrier** — the universal baseboard: card-edge socket + all peripherals + full
   pin breakout + 5V input + adjustable SoC power.
 
 Terminology note: "interposer" = SoC module; "carrier" = baseboard. (Reversed
@@ -15,7 +15,7 @@ from some earlier notes — this doc is canonical.)
 
 ---
 
-## 1. Connector: 0.5 mm card edge (MXM3-314 primary, DDR4 SO-DIMM-260 alternate)
+## 1. Connector: 0.5 mm card edge (DDR4 SO-DIMM-260 primary, MXM3-314 backup premium)
 
 A **card-edge** connector: module side = gold fingers (a fab option, $0 parts),
 socket on the carrier. Chosen over Socket 370 (module needs machined pins — cost
@@ -27,29 +27,46 @@ pad-to-pad routing. We use it **mechanically only** — the pinout is ours (§8)
 **Two viable sockets, same 0.5 mm edge; the interposer mates either** (design the
 carrier footprint for one, the card is universal):
 
-| | **MXM 3.0 — 314-pin (primary)** | **DDR4 SO-DIMM — 260-pin (alternate)** |
+| | **DDR4 SO-DIMM — 260-pin (primary)** | **MXM 3.0 — 314-pin (backup premium)** |
 |---|---|---|
-| Contacts | 314 | 260 |
+| Contacts | 260 | 314 |
 | Pitch | 0.5 mm | 0.5 mm |
-| Card thickness | 1.2 mm | 1.0 mm |
-| In-stock parts | **Amphenol 10151114-001TLF** (5.0 mm stack, first-tier); **ATTEND 125B-78C00** (~1.1k @ DigiKey, $16.69); **JAE MM70-314B1-2-R300** | TE 2309407-2 / ATTEND 124A-52A03; **many, ubiquitous** |
-| LCSC / JLCPCB | **JAE MM70-314B1-2-R300 = LCSC C4818180**, 25 in stock ~$10.69–14.35, **discontinued** (last stock) → JLCPCB-assemblable for a first run | **stocked** (167 in DDR memory-conn cat) → auto-placeable, sustained |
-| Headroom | ~119 ground after full superset | ~65 ground after full superset |
+| Card thickness | **1.0 mm** | 1.2 mm |
+| Cost | **~$0.83–1.67** | ~$10.69–17 |
+| LCSC / JLCPCB | **deep multi-SKU stock → auto-placeable, sustained** | last 25 of a discontinued part → hand-solder |
+| In-stock parts | **Foxconn ASAA821-E8SB0-7H** (C2925427, 183 stock, ~$1); Foxconn ASAA821-EARB0-7H (C225725); LOTES ADDR0075-P001C (C2926865) | Amphenol 10151114-001TLF (5.0 mm, first-tier); ATTEND 125B-78C00 (~1.1k @ DigiKey) |
+| Headroom | ~65 ground after full superset | ~119 ground |
+
+**Why SO-DIMM is primary:** ~10× cheaper (~$1 vs ~$15), **deep multi-SKU LCSC
+stock** (JLCPCB-assemblable, *sustained* — DDR4 laptop-RAM market is enormous),
+first-tier makers (Foxconn/LOTES), and its 260 pins are **enough** (§8: ~180 sig +
+15 pwr + 65 gnd). **MXM3-314 is the backup premium** — a fading laptop-GPU part
+(JAE discontinued, ACES 0-stock, only 25 units on LCSC), kept only for the case
+where you want the ~54 spare grounds and don't mind hand-soldering an Amphenol
+socket. Same 0.5 mm edge either way; only the card thickness (1.0 vs 1.2 mm) and
+carrier footprint differ, so a design can be re-spun between them.
 
 **Footprints / links:**
-- Amphenol 10151114-001TLF footprint+symbol: <https://www.snapeda.com/search/?q=10151114-001TLF&search-type=parts>
-- JAE MM70-314B1-2-R300 on LCSC (25 stock, EasyEDA footprint): <https://www.lcsc.com/product-detail/C4818180.html>
-- Each maker's socket has a **different SMT land pattern** — the carrier footprint
-  commits to one. TODO: check whether the JAE and Amphenol MXM3 land patterns
-  align (if so, proto on JAE/LCSC → production on Amphenol with no re-spin).
+- **DDR4 SO-DIMM Foxconn ASAA821-E8SB0-7H** (183 stock, EasyEDA footprint on LCSC): <https://lcsc.com/product-detail/Memory-Connector-DDR_FOXCONN-ASAA821-E8SB0-7H_C2925427.html>
+- MXM3 Amphenol 10151114-001TLF footprint+symbol: <https://www.snapeda.com/search/?q=10151114-001TLF&search-type=parts>
+- MXM3 JAE MM70-314B1-2-R300 on LCSC (last 25): <https://www.lcsc.com/product-detail/C4818180.html>
+- Pick the SO-DIMM socket **orientation** (right-angle = card lies flat, standard,
+  low-profile) and **stack height** (~4.0 / 5.2 / 8.0 mm) to match the interposer
+  standoff — same mechanical decision you'd make for MXM3.
 
-**Sourcing reality (verified 2026-07):** MXM3 is a fading laptop-GPU part — JAE
-MM70-314 is **discontinued** (but LCSC still has 25), ACES 52741-3140A-002
-**0-stock**; **Amphenol 10151114-001TLF** is the live first-tier go-forward.
-Practical path: **proto via JLCPCB using the JAE (C4818180) footprint** while the
-25 last, or design straight to Amphenol (hand-solder / DigiKey). The **SO-DIMM-260
-is the sustained LCSC-friendly fallback** — same 0.5 mm edge, 1.0 mm card, its 260
-pins are **enough** (§8), just a re-spun carrier footprint.
+**Interposer mechanical:**
+- **PCB thickness = 1.0 mm ±0.1** (the SO-DIMM card-edge spec; MXM3 = 1.2 mm).
+  Hard requirement — too thick won't seat / spreads the contacts, too thin =
+  intermittent. It's a standard JLCPCB/PCBWay thickness (4-layer at 1.0 mm is fine).
+- **Edge geometry is fixed by the socket:** the gold-finger row (~130/face at
+  0.5 mm ≈ 65 mm span → ~68 mm card width), the DDR4 **key notch** at the JEDEC
+  position, and the two **side latch cut-outs** so the socket grips + latches.
+  Copy these from the SO-DIMM mechanical drawing.
+- **Depth + component layout are ours** — the card only needs to be as deep
+  (~20–30 mm) as fits the SoC island. Put the SoC + tall parts (NOR SOIC ~1.75 mm,
+  buck inductor ~1.2 mm, crystal ~0.8 mm) on the **top** face; keep the bottom
+  (toward the carrier) low-profile. The socket floats the card above the carrier
+  at its stack height, so ~1.75 mm tall parts clear easily.
 
 ---
 
@@ -205,9 +222,9 @@ committed`:
 
 | | signals | power | committed | ground (fill) | SI (need ≥1 GND/3 sig) |
 |---|---|---|---|---|---|
-| **MXM3-314**, full superset | ~180 | ~15 | ~195 | **~119** | luxurious |
 | **SO-DIMM-260**, full superset | ~180 | ~15 | ~195 | **~65** | good (~1 GND/3 sig) |
 | SO-DIMM-260, camera-only (no A1) | ~145 | ~15 | ~160 | ~100 | excellent |
+| MXM3-314, full superset | ~180 | ~15 | ~195 | ~119 | luxurious (backup) |
 
 So **260 pins clears the *full* superset** (incl. A1 video) with ~65 grounds —
 enough for 1.5 Gbps MIPI + 125 MHz RGMII. 314 just buys spare grounds we don't
@@ -219,7 +236,7 @@ if it ever gets tight. No single
 interposer needs every peripheral of every SoC at once.
 
 **Assign geography-first, not by GPIO bank order:** place the carrier floorplan
-(connector + peripheral connectors), then assign the 314 positions so nets exit
+(connector + peripheral connectors), then assign the 260 positions so nets exit
 the socket already pointed at their destination — USB fingers by the USB jacks,
 MIPI pairs by the FFC, MSC0 by the SD slot, GPIO banks by their headers. Rules:
 - each MIPI pair on **adjacent fingers, same face**, GND finger each side;
@@ -241,7 +258,7 @@ MIPI pairs by the FFC, MSC0 by the SD slot, GPIO banks by their headers. Rules:
 
 **Deferred (decide later):**
 - Whether to break out **dual 4-lane CSI + DVP16 simultaneously** — the one
-  requirement that could push the pinout past 314. Single CSI block fits with
+  requirement that could push the pinout past 260. Single CSI block fits with
   headroom; revisit if multi-sensor (T40/T41) becomes a target use case.
 
 **Decided:**
@@ -257,4 +274,4 @@ All in `~/projects/thingino/ingenic-docs`: per-SoC `HDK/*_BOARD_DESIGN_GUIDE`,
 `HDK/*Hardware Design Checklist`, and `Datasheets/*` (source of the rail table).
 `MARK_C90_MAIN_V2_0_QFN96` informed teacup-neo's T41 power tree. teacup-neo (this
 repo) is the first single-SoC (T41) proof; the interposer is its SoC section
-lifted onto an MXM3 edge.
+lifted onto a SO-DIMM-260 card edge.
