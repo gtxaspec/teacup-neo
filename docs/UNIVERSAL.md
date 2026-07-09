@@ -15,24 +15,34 @@ from some earlier notes — this doc is canonical.)
 
 ---
 
-## 1. Connector: MXM 3.0 (314-pin, 0.5 mm card edge)
+## 1. Connector: 0.5 mm card edge (MXM3-314 primary, DDR4 SO-DIMM-260 alternate)
 
-Chosen over Socket 370 (module needs machined pins — cost lands on the part you
-build most), mezzanine stacks (delicate for bench swapping), and SODIMM (fewer
-pins). MXM3 gives the pin count of a big PGA with the module side costing
-**nothing** — gold fingers, not connectors.
+A **card-edge** connector: module side = gold fingers (a fab option, $0 parts),
+socket on the carrier. Chosen over Socket 370 (module needs machined pins — cost
+on the part you build most) and mezzanine stacks (delicate for bench swapping).
+Fingers escape perpendicular on their own layer; single row per face, so no
+pad-to-pad routing. We use it **mechanically only** — the pinout is ours (§8).
+4-layer carrier suffices (no PCIe/DDR crossing the edge).
 
-| Property | Value |
-|---|---|
-| Contacts | 314 (157/face, odd-even split across faces) |
-| Pitch | 0.5 mm, single row per face (no pad-to-pad routing needed) |
-| Module PCB | **1.2 mm** thick, edge fingers hard-gold (Ni/Au) + 20° bevel |
-| Socket | latching, SMT, ~$3–8 (Foxconn/ACES on LCSC) |
-| Signalling headroom | PCIe Gen3 rated → our worst case (MIPI ~1.5 Gbps, RGMII 125 MHz) is trivial |
+**Two viable sockets, same 0.5 mm edge; the interposer mates either** (design the
+carrier footprint for one, the card is universal):
 
-We use MXM3 **mechanically only** — the electrical pinout is ours to define
-(section 8). Fingers escape perpendicular on their own layer; vias stagger back
-1–2 mm in 2–3 ranks. 4-layer carrier suffices (no PCIe/DDR crossing the edge).
+| | **MXM 3.0 — 314-pin (primary)** | **DDR4 SO-DIMM — 260-pin (alternate)** |
+|---|---|---|
+| Contacts | 314 | 260 |
+| Pitch | 0.5 mm | 0.5 mm |
+| Card thickness | 1.2 mm | 1.0 mm |
+| In-stock parts | **Amphenol 10151114-001TLF** (5.0 mm stack, SnapEDA footprint exists); **ATTEND 125B-78C00** (~1.1k @ DigiKey, $16.69) | TE 2309407-2 / ATTEND 124A-52A03; **many, ubiquitous** |
+| LCSC / JLCPCB | **NOT stocked** → hand-solder socket | **stocked** (167 in DDR memory-conn cat) → auto-placeable |
+| Headroom | ~65 ground after full superset | ~65 ground after full superset |
+
+**Sourcing reality (verified 2026-07):** MXM3 is a fading laptop-GPU part — JAE
+MM70-314 is **obsolete**, ACES 52741-3140A-002 **0-stock**. Amphenol + ATTEND are
+the live first-tier options; not on LCSC. The **SO-DIMM is the more buildable
+choice** (ubiquitous, cheap, LCSC/JLCPCB), and its 260 pins are **enough** — see
+§8. Recommendation: lay out for MXM3-314 for spare grounds if Amphenol stock
+holds; keep SO-DIMM-260 as the drop-in-different-footprint fallback (same edge,
+1.0 mm card, re-spun carrier footprint).
 
 ---
 
@@ -174,21 +184,31 @@ A small **I2C EEPROM** (or 3–4 resistor-strapped ID pins) on the interposer so
 (skip only 5V/GND). Whatever interposer is plugged in, its live pins are all
 accessible — this is the point of a bench board.
 
-**314 validated sufficient.** A1 and T40 are BGA356/381, but balls ≠ connector
-signals: most balls are power/ground distribution and (on external-DDR variants)
-the ~90-ball DDR bus — **none of which cross the connector** (DDR routes local to
-the SoC on the interposer). Actual external signal counts: **T40 ~120 GPIO** (PA–
-PD, from datasheet mux table) + ~30 analog (2× CSI, USB, audio, SADC) ≈ 150;
-T41 BGA232 ~130; A1 adds ~25 unique (HDMI/VGA/DSI). Superset union ≈ **~175 sig**.
+**Both 314 and 260 are sufficient.** A1 and T40 are BGA356/381, but balls ≠
+connector signals: most balls are power/ground distribution and (on external-DDR
+variants) the ~90-ball DDR bus — **none of which cross the connector** (DDR routes
+local to the SoC on the interposer). Actual external signal counts: **T40 ~120
+GPIO** (PA–PD, from datasheet mux table) + ~30 analog (2× CSI, USB, audio, SADC) ≈
+150; T41 BGA232 ~130; A1 adds ~25 unique (HDMI/VGA/DSI). Superset ≈ **~180 sig**.
 
-```
-~175 signals + ~25 power + ~50 ground ≈ 250 of 314  →  ~64 spare (~20% headroom)
-```
+**Ground is *fill*, not fixed overhead** — only signals (~180) and power (~15,
+current-driven) are committed; every remaining pin becomes ground, and
+more-is-better. So the budget is: `committed = signals + power`, `ground = total −
+committed`:
 
-Margin is eaten only by the two deferred cases (dual-CSI+DVP16 simultaneous,
-+~36; A1 video kept distinct, +~25). **Escape valve:** A1 (video-out) and the
-T-cameras never share an interposer, so their mutually-exclusive peripherals can
-occupy the **same** connector positions if it ever gets tight. No single
+| | signals | power | committed | ground (fill) | SI (need ≥1 GND/3 sig) |
+|---|---|---|---|---|---|
+| **MXM3-314**, full superset | ~180 | ~15 | ~195 | **~119** | luxurious |
+| **SO-DIMM-260**, full superset | ~180 | ~15 | ~195 | **~65** | good (~1 GND/3 sig) |
+| SO-DIMM-260, camera-only (no A1) | ~145 | ~15 | ~160 | ~100 | excellent |
+
+So **260 pins clears the *full* superset** (incl. A1 video) with ~65 grounds —
+enough for 1.5 Gbps MIPI + 125 MHz RGMII. 314 just buys spare grounds we don't
+strictly need. The only thing that would exceed 260 is a 1-GND-per-signal scheme
+(overkill at our speeds) or dual-CSI+DVP16 simultaneous (+~36, deferred §9).
+**Escape valve:** A1 (video-out) and the T-cameras never share an interposer, so
+their mutually-exclusive peripherals can occupy the **same** connector positions
+if it ever gets tight. No single
 interposer needs every peripheral of every SoC at once.
 
 **Assign geography-first, not by GPIO bank order:** place the carrier floorplan
