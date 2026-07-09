@@ -195,7 +195,10 @@ MIPI pairs by the FFC, MSC0 by the SD slot, GPIO banks by their headers. Rules:
 - **Peripheral 3.3/1.8 source**: carrier-local reg off 5V (keeps interposer
   SoC-only) — assumed yes; confirm.
 - **VCORE remote-sense** wiring in mode B (transient response).
-- Exact **T30 currents** + **T20/T30** full rail confirmation (datasheets).
+- Exact **T30** rails + currents (datasheet didn't extract; envelope only, sits
+  between T23/T31). **T20 is confirmed** — based on the **T10 datasheet** (same
+  silicon: core 1.1 V, DDR 1.8 V, analog on 3.3 V, EFUSE 2.5 V, VDDCORE/VDDMEM
+  ≥1 A), per the table above.
 
 **Deferred (decide later):**
 - Whether to break out **dual 4-lane CSI + DVP16 simultaneously** — the one
