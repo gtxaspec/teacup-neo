@@ -291,6 +291,14 @@ interposer is plugged in).
 host) **and WiFi + BLE** (wireless), dual-core, ample GPIO. ESP32-C3 is the budget
 cut (USB-Serial-JTAG + WiFi, fewer pins).
 
+**Part — module, not bare chip: `ESP32-S3-WROOM-1-N16R8`** (LCSC **C2913202**,
+~$3.64, 458 in stock, **JLCPCB-assemblable**). A pre-certified module integrates
+the antenna / RF match / 40 MHz crystal / 16 MB flash / 8 MB PSRAM (headroom for
+the control app + web UI + buffering a NOR image) — **no RF layout or cert.** Route
+its native-USB pins **GPIO19 (D−) / GPIO20 (D+)** to the BMC USB-C. Variants:
+`-1U` (C3013946, U.FL external antenna, for metal enclosures/range); `-N8R2` to
+shave cost; **ESP32-S3-MINI-1** if space-tight (same silicon/USB, less flash/PSRAM).
+
 **Control plane** (agent-facing API over USB-CDC *and/or* WiFi REST/MQTT/telnet):
 
 | Function | Mechanism | Silicon |
