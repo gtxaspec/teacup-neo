@@ -183,9 +183,12 @@ so DDRVDD feeds the in-package die — no external DDR bus, but the rail is stil
 required at the right voltage.
 
 Analog sub-rails (USB_AVD33/18/09, PLL_AVDD, CSI_VCC, CODEC_AVDD, and A1's
-VGA/HDMI_AVDD) are the **same voltages** as the main rails but must be
+VGA/HDMI_AVDD plus **SATA0/1_VCC 0.9 V + SATA0/1_VCCH 1.8 V** with a SATA_RBIAS
+2 kΩ 1% ref) are the **same voltages** as the main rails but must be
 **bead-isolated** (1 kΩ@100 MHz) separate nets — they are their own domains for
-test/probe purposes (section 6).
+test/probe purposes (section 6). The SATA PHY analog rails live on the **A1
+interposer** (like all SoC-specific analog), fed from the carrier 0.9/1.8 through
+their own beads.
 
 ---
 
@@ -308,7 +311,13 @@ connector signals: most balls are power/ground distribution and (on external-DDR
 variants) the ~90-ball DDR bus — **none of which cross the connector** (DDR routes
 local to the SoC on the interposer). Actual external signal counts: **T40 ~120
 GPIO** (PA–PD, from datasheet mux table) + ~30 analog (2× CSI, USB, audio, SADC) ≈
-150; T41 BGA232 ~130; A1 adds ~25 unique (HDMI/VGA/DSI). Superset ≈ **~180 sig**.
+150; T41 BGA232 ~130. **A1 is the NVR outlier** (BGA356, 14 mm): its **display-out
+(HDMI 2.0 / VGA / RGB-TFT / BT1120 / DSI) shares the camera-zone** with T-series
+camera-*in* (mutually exclusive per interposer — no module is both), so display adds
+~0 net. Its genuinely-**unique** adds are **dual SATA 3.0** (SATA0/1 = 4 diff pairs
+≈ 8 sig), the **2nd RGMII GMAC** (~12 sig; the 1st shares the T-series MAC position),
+and 2 extra USB (~8) ≈ **~28 unique**. Superset ≈ **~180 sig** either way — the
+display sharing is what keeps A1 in budget; SATA/GbE are the real adds and they fit.
 
 **Ground is *fill*, not fixed overhead** — only signals (~180) and power (~15,
 current-driven) are committed; every remaining pin becomes ground, and
@@ -322,14 +331,18 @@ committed`:
 | UDIMM-288 (desktop), full superset | ~180 | ~15 | ~195 | ~93 | very good (option) |
 | MXM3-314, full superset | ~180 | ~15 | ~195 | ~119 | luxurious (backup) |
 
-So **260 pins clears the *full* superset** (incl. A1 video) with ~65 grounds —
-enough for 1.5 Gbps MIPI + 125 MHz RGMII. 314 just buys spare grounds we don't
-strictly need. The only thing that would exceed 260 is a 1-GND-per-signal scheme
-(overkill at our speeds) or dual-CSI+DVP16 simultaneous (+~36) — a combo no single
-SoC implements, and the UDIMM-288 / MXM3-314 options cover it if ever real (§10).
-**Escape valve:** A1 (video-out) and the T-cameras never share an interposer, so
-their mutually-exclusive peripherals can occupy the **same** connector positions
-if it ever gets tight. No single
+So **260 pins clears the *full* superset** (incl. full A1 with SATA + dual GbE) with
+~65 grounds. The highest-speed nets crossing the socket are now **A1's dual SATA
+(3 Gbps) + HDMI TMDS** and dual-2-lane MIPI — and grounds are **per-interposer** (only
+one module is ever seated), so those ~65 positions flank whichever SoC's high-speed
+pairs are present with room to spare. **Recommended connector for the A1/SATA build:
+UDIMM-288** (~93 grounds *and* a coarser 0.85 mm pitch that's friendlier to SATA/HDMI
+edge fingers) or MXM3-314 — 260 works, but 288 is the better home for the fastest
+diff pairs. The only thing that truly exceeds 260 is a 1-GND-per-signal scheme
+(overkill) or dual-CSI+DVP16 simultaneous (+~36) — a combo no single SoC implements.
+**Escape valve:** A1 (video-*out* + SATA/storage) and the T-cameras (video-*in*)
+never share an interposer, so their mutually-exclusive peripherals occupy the **same**
+connector positions — A1's HDMI/VGA/RGB reuse the T-series camera-zone. No single
 interposer needs every peripheral of every SoC at once.
 
 **Assign geography-first, not by GPIO bank order:** place the carrier floorplan
@@ -487,6 +500,17 @@ handful of the 260 positions, already part of the SoC signal set (§8).
   from datasheets (T20 via the T10 datasheet, same silicon; T30 via its own). The
   one number no datasheet states is T30's exact core *current*, but the ≥3 A
   universal VCORE spec covers it with margin regardless. Nothing left to resolve.
+- **A1 = full support, incl. dual SATA 3.0 + dual GbE (decided).** A1 is an NVR
+  processor, not a camera — no MIPI/DVP sensor input; it ingests video over
+  Ethernet. Supported set: boot (NAND/SD/eMMC/USB), 3× UART, 3× USB OTG, **dual
+  RGMII GMAC** (2× RJ45 on the carrier), **dual SATA 3.0** (SATA0/1 → 2× SATA
+  connectors on the carrier), and display-out (HDMI 2.0 / VGA / RGB-TFT / BT1120),
+  which **reuses the T-series camera-zone positions** (mutually exclusive per
+  interposer). Unique cost ≈ 28 sig (SATA + 2nd MAC + extra USB) — fits ~180 (§8).
+  Use the **A1 SIP-DDR variant** (built-in DDR3L) for a clean small interposer;
+  external-DDR A1 puts DRAM on the interposer. SATA/HDMI are the fastest nets over
+  the socket → **build A1 on the UDIMM-288** (coarser pitch + more grounds), 260 ok.
+  The carrier's SATA connectors + 2nd RJ45 are **stuffing options** (A1 build only).
 - This is an **independent design** — the pinout is ours, NOT constrained to be
   mateable with Ingenic's TOMCAT / vendor core-board convention. MXM3 is used
   mechanically only.
