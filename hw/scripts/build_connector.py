@@ -180,8 +180,15 @@ for num, spec in UNIT3.items():
 # GPIO0-15 are plain unclaimed superset pins for whatever's left after every
 # named peripheral above -- deliberately generic, not tied to a specific SoC
 # pin identity, since "remaining plain GPIO" is itself one of the user's
-# approved header clusters. Pins 170-192 (23 pins) are left unconnected --
-# ground is fill, not fixed overhead (SS8) -- same as units 5/6 below.
+# approved header clusters. Pins 170-192 (23 pins), plus all of units 5-6
+# below (193-288, 96 pins), were originally left unconnected on the "ground
+# is fill, not fixed overhead" theory (SS8) -- superseded by explicit user
+# direction: break ALL remaining J1 pins out to headers too, for future use.
+# Each becomes a raw SPARE_P<n> global label carrying the literal connector
+# pin number (not a guessed function) straight to a spare-header cluster on
+# the headers sheet -- these consume no GND-fill budget of their own since
+# each spare header's single reference GND pin ties to the board's common
+# GND net, not a unique J1 position.
 u4x, u4y = S(250), S(56)
 s.place(CONN, "J1", "AH58893-T9B10-3F", u4x, u4y, 0, unit=4,
         ref_at=(u4x, u4y - S(26), 0), value_at=(u4x, u4y + S(26), 0))
@@ -196,15 +203,20 @@ UNIT4[152] = "GND"
 for i in range(16):
     UNIT4[153 + i] = f"GPIO{i}"
 UNIT4[169] = "GND"
+for p in range(170, 193):
+    UNIT4[p] = f"SPARE_P{p}"
 
 for num, spec in UNIT4.items():
     unit_pin(u4x, u4y, 4, num, spec)
 
-# ============ Units 5-6 (pins 193-288): reserved, placed unconnected ============
+# ============ Units 5-6 (pins 193-288): spare breakout, all SPARE_P<n> ============
 positions = [(S(110), S(130)), (S(180), S(130))]
 for i, (ux, uy) in enumerate(positions, start=5):
     s.place(CONN, "J1", "AH58893-T9B10-3F", ux, uy, 0, unit=i,
             ref_at=(ux, uy - S(26), 0), value_at=(ux, uy + S(26), 0))
+    lo = 193 + (i - 5) * 48
+    for p in range(lo, lo + 48):
+        unit_pin(ux, uy, i, p, f"SPARE_P{p}")
 
 out = s.render("DDR4 UDIMM-288 Connector", str(uuid.uuid4()), "/016abe51-c097-4611-854e-0af763646499", "3", paper="A3")
 open("/home/administrator/projects/teacup-neo/hw/sheets/connector.kicad_sch", "w").write(out)

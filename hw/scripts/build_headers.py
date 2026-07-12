@@ -51,10 +51,30 @@ CLUSTERS = [
     ("J29", "SMB0/SMB1 (general I2C)", ["SMB0_SDA", "SMB0_SCK", "SMB1_SDA", "SMB1_SCK"]),
 ]
 
+# Spare breakout for every J1 pin left over after the named superset
+# clusters above -- explicit user direction: all remaining unused J1 pins
+# get broken out to headers too, for future use. Raw SPARE_P<n> labels
+# (n = the literal J1 connector pin number) carry straight through from
+# build_connector.py's unit4 tail (170-192) and units 5-6 (193-288, entirely
+# spare) -- grouped by connector unit for traceability, not by any assumed
+# function, since these are genuinely undefined-purpose pins.
+SPARE_CLUSTERS = [
+    ("J31", "J1 SPARE (P170-192)", [f"SPARE_P{p}" for p in range(170, 193)]),
+    ("J32", "J1 SPARE (P193-216)", [f"SPARE_P{p}" for p in range(193, 217)]),
+    ("J33", "J1 SPARE (P217-240)", [f"SPARE_P{p}" for p in range(217, 241)]),
+    ("J34", "J1 SPARE (P241-264)", [f"SPARE_P{p}" for p in range(241, 265)]),
+    ("J35", "J1 SPARE (P265-288)", [f"SPARE_P{p}" for p in range(265, 289)]),
+]
+
 COLA_X = S(40)
 COLB_X = S(160)
+COLC_X = S(280)
+COLD_X = S(400)
+COL_X = {"A": COLA_X, "B": COLB_X, "C": COLC_X, "D": COLD_X}
 COL_ORDER = {"J20": "A", "J21": "A", "J25": "A", "J27": "A", "J30": "A",
-             "J22": "B", "J23": "B", "J24": "B", "J26": "B", "J28": "B", "J29": "B"}
+             "J22": "B", "J23": "B", "J24": "B", "J26": "B", "J28": "B", "J29": "B",
+             "J31": "C", "J32": "C", "J33": "C",
+             "J34": "D", "J35": "D"}
 
 def half_span(n_total):
     return S(2) * ((n_total - 1) / 2)
@@ -91,11 +111,11 @@ def place_header(ref, title, signals, x, y_center):
 # cursor tracking the smallest unused y so far, sized to each header's
 # actual pin count so nothing overlaps regardless of cluster size.
 TOP_MARGIN = S(25)
-cursors = {"A": TOP_MARGIN, "B": TOP_MARGIN}
+cursors = {"A": TOP_MARGIN, "B": TOP_MARGIN, "C": TOP_MARGIN, "D": TOP_MARGIN}
 GAP = S(10)
-for ref, title, signals in CLUSTERS:
+for ref, title, signals in CLUSTERS + SPARE_CLUSTERS:
     col = COL_ORDER[ref]
-    x = COLA_X if col == "A" else COLB_X
+    x = COL_X[col]
     n = len(signals) + 1
     hs = half_span(n)
     top_pad = S(5)  # room for the title text above visual_top

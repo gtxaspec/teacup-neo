@@ -660,9 +660,7 @@ SMB1/DMIC), **PWM0-7** (8 sig), **SAR-ADC** (1 sig, `SAR_AUX0` — single
 dedicated analog pin, matches the T41 reference board's `ADC_AUX0`, not a
 multi-channel SADC), **SMB0/SMB1** (4 sig, general I²C, kept electrically
 isolated from the `I2C_ID_SDA/SCL` carrier-ID EEPROM bus, §7), and 16 plain
-unclaimed `GPIO0`-`GPIO15` pins for whatever's left. Units 5-6 (pins
-193–288) and the pins-170-192 tail of unit 4 stay unconnected — ground is
-fill, not fixed overhead, same as before this pass. Verified: 0 layout
+unclaimed `GPIO0`-`GPIO15` pins for whatever's left. Verified: 0 layout
 overlaps (`check_overlaps.py`), full netlist diff confirms only J1
 pins 87–169 and the 11 new header refs changed (nothing on power/BMC/IO/
 connector-units-1-2 shifted), ERC error count went *down* (231→158) purely
@@ -670,6 +668,31 @@ from previously-NC pins now being driven, and the ERC warning increase is
 entirely the same pre-existing "unspecified pin type" class already
 tolerated elsewhere on this board (generic connector pins), at the same
 proportion as before.
+
+**All remaining J1 pins also broken out (decided, supersedes the "ground is
+fill" default above for this connector).** Explicit user direction: every
+still-unused J1 pin — the pins-170-192 tail of unit 4 plus all of units 5-6
+(193-288), 119 pins total, previously left unconnected — now carries a raw
+`SPARE_P<n>` global label (`<n>` = the literal J1 pin number) straight to 5
+new spare-breakout headers (`J31`-`J35`, `hw/sheets/headers.kicad_sch`),
+grouped by connector unit for traceability rather than any assumed function,
+since these are genuinely undefined-purpose pins reserved for whatever a
+future interposer or bring-up need turns out to want. Each spare header's
+GND reference pin ties to the board's common GND net rather than consuming
+a J1 position, so this costs nothing against the SS8 pin/ground budget.
+Note this repurposes the pins the "ground is fill" rule (§8, top) would
+otherwise have wanted — a deliberate tradeoff of some signal-integrity
+headroom for maximum future flexibility on a bring-up/bench board. Verified
+the same way as the header sheet above: 0 overlaps, netlist diff shows only
+the 119 new J1 net assignments + 5 new header refs added (nothing else
+moved), ERC total violation count unchanged (426 before and after — the 118
+`pin_not_connected` violations these pins used to carry became the board's
+existing `pin_to_pin` "unspecified pin type" warning class instead, no new
+categories). Also fixed in this pass: `W25Q32JVSS`/`DIP8_NOR_SOCKET` (added
+in the prior BMC PR) carried KiCad-10-only symbol-property fields that made
+the schematic fail to load entirely in the KiCad 9.0.8 actually installed
+here — stripped in `teacup-carrier.kicad_sym`, confirmed electrically
+identical via netlist diff (only UUIDs changed).
 
 ### 8a. Carrier peripheral blocks — original dedicated-hardware plan (reference only, not used in this build)
 
