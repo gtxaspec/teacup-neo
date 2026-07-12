@@ -117,6 +117,51 @@ D2  (PMEG2010ER)
       pin    1  K                    -> U5_VIN
       pin    2  A                    -> +5V_ALT
 
+JP2  (0.8V)
+      footprint: Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical
+      pin    1  Pin_1                -> VCORE_FB_SEL
+      pin    2  Pin_2                -> VCORE_FB_0V8
+
+JP3  (0.9V)
+      footprint: Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical
+      pin    1  Pin_1                -> VCORE_FB_SEL
+      pin    2  Pin_2                -> VCORE_FB_0V9
+
+JP4  (1.0V)
+      footprint: Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical
+      pin    1  Pin_1                -> VCORE_FB_SEL
+      pin    2  Pin_2                -> VCORE_FB_1V0
+
+JP5  (1.1V)
+      footprint: Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical
+      pin    1  Pin_1                -> VCORE_FB_SEL
+      pin    2  Pin_2                -> VCORE_FB_1V1
+
+JP6  (COMPUTER)
+      footprint: Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical
+      pin    1  Pin_1                -> VCORE_FB_SEL
+      pin    2  Pin_2                -> VCORE_FB_DIGIPOT
+
+JP7  (1.35V)
+      footprint: Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical
+      pin    1  Pin_1                -> VDDR_FB_SEL
+      pin    2  Pin_2                -> VDDR_FB_1V35
+
+JP8  (1.5V)
+      footprint: Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical
+      pin    1  Pin_1                -> VDDR_FB_SEL
+      pin    2  Pin_2                -> VDDR_FB_1V5
+
+JP9  (1.8V)
+      footprint: Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical
+      pin    1  Pin_1                -> VDDR_FB_SEL
+      pin    2  Pin_2                -> VDDR_FB_1V8
+
+JP10  (COMPUTER)
+      footprint: Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical
+      pin    1  Pin_1                -> VDDR_FB_SEL
+      pin    2  Pin_2                -> VDDR_FB_DIGIPOT
+
 L1  (2.2uH)
       footprint: Inductor_SMD:L_1210_3225Metric
       pin    1                       -> U1_SW
@@ -154,7 +199,7 @@ R4  (10k)
 
 R5  (100k)
       footprint: Resistor_SMD:R_0402_1005Metric
-      pin    1                       -> +3V3
+      pin    1                       -> +5V_SW
       pin    2                       -> U7_EN
 
 R6  (31.6k)
@@ -192,6 +237,86 @@ R24  (10k)
       pin    1                       -> +3V3
       pin    2                       -> PG_SW5V_ALT
 
+R25  (4.7k)
+      footprint: Resistor_SMD:R_0402_1005Metric
+      pin    1                       -> +3V3
+      pin    2                       -> I2C_PWR_SDA
+
+R26  (4.7k)
+      footprint: Resistor_SMD:R_0402_1005Metric
+      pin    1                       -> +3V3
+      pin    2                       -> I2C_PWR_SCL
+
+R27  (3.32k)
+      footprint: Resistor_SMD:R_0402_1005Metric
+      pin    1                       -> VCORE
+      pin    2                       -> VCORE_FB_0V8
+
+R28  (10.0k)
+      footprint: Resistor_SMD:R_0402_1005Metric
+      pin    1                       -> VCORE_FB_0V8
+      pin    2                       -> GND
+
+R29  (4.99k)
+      footprint: Resistor_SMD:R_0402_1005Metric
+      pin    1                       -> VCORE
+      pin    2                       -> VCORE_FB_0V9
+
+R30  (10.0k)
+      footprint: Resistor_SMD:R_0402_1005Metric
+      pin    1                       -> VCORE_FB_0V9
+      pin    2                       -> GND
+
+R31  (6.65k)
+      footprint: Resistor_SMD:R_0402_1005Metric
+      pin    1                       -> VCORE
+      pin    2                       -> VCORE_FB_1V0
+
+R32  (10.0k)
+      footprint: Resistor_SMD:R_0402_1005Metric
+      pin    1                       -> VCORE_FB_1V0
+      pin    2                       -> GND
+
+R33  (8.25k)
+      footprint: Resistor_SMD:R_0402_1005Metric
+      pin    1                       -> VCORE
+      pin    2                       -> VCORE_FB_1V1
+
+R34  (10.0k)
+      footprint: Resistor_SMD:R_0402_1005Metric
+      pin    1                       -> VCORE_FB_1V1
+      pin    2                       -> GND
+
+R35  (6.81k)
+      footprint: Resistor_SMD:R_0402_1005Metric
+      pin    1                       -> VDDR
+      pin    2                       -> VDDR_FB_1V35
+
+R36  (10.0k)
+      footprint: Resistor_SMD:R_0402_1005Metric
+      pin    1                       -> VDDR_FB_1V35
+      pin    2                       -> GND
+
+R37  (8.66k)
+      footprint: Resistor_SMD:R_0402_1005Metric
+      pin    1                       -> VDDR
+      pin    2                       -> VDDR_FB_1V5
+
+R38  (10.0k)
+      footprint: Resistor_SMD:R_0402_1005Metric
+      pin    1                       -> VDDR_FB_1V5
+      pin    2                       -> GND
+
+R39  (12.4k)
+      footprint: Resistor_SMD:R_0402_1005Metric
+      pin    1                       -> VDDR
+      pin    2                       -> VDDR_FB_1V8
+
+R40  (10.0k)
+      footprint: Resistor_SMD:R_0402_1005Metric
+      pin    1                       -> VDDR_FB_1V8
+      pin    2                       -> GND
+
 U1  (AP62600SJ-7)
       footprint: teacup-carrier:QFN-12_L3.0-W2.0-P0.50-TL_AP62600SJ-7
       pin    1  PGND                 -> GND
@@ -205,14 +330,14 @@ U1  (AP62600SJ-7)
       pin    9  VCC                  -> U1_VCC
       pin   10  SS/TR                -> U1_SS
       pin   11  GND                  -> GND
-      pin   12  FB                   -> VCORE_FB
+      pin   12  FB                   -> VCORE_FB_SEL
 
 U2  (AP62300WU-7)
       footprint: teacup-carrier:TSOT-23-6_L2.9-W1.6-P0.95-LS2.8-BL
       pin    1  GND                  -> GND
       pin    2  SW                   -> U2_SW
       pin    3  VIN                  -> +5V_SW
-      pin    4  FB                   -> VDDR_FB
+      pin    4  FB                   -> VDDR_FB_SEL
       pin    5  EN                   -> U2_EN
       pin    6  BST                  -> U2_BST
 
@@ -223,10 +348,10 @@ U3  (MCP4661-104E_ST)
       pin    3  SDA                  -> I2C_PWR_SDA
       pin    4  VSS                  -> GND
       pin    5  P1B                  -> GND
-      pin    6  P1W                  -> VDDR_FB
+      pin    6  P1W                  -> VDDR_FB_DIGIPOT
       pin    7  P1A                  -> VDDR
       pin    8  P0A                  -> VCORE
-      pin    9  P0W                  -> VCORE_FB
+      pin    9  P0W                  -> VCORE_FB_DIGIPOT
       pin   10  P0B                  -> GND
       pin   11  WP                   -> +3V3
       pin   12  A2                   -> GND
@@ -589,10 +714,20 @@ C22  (100nF)
       pin    1                       -> +3V3_ALWAYS
       pin    2                       -> GND
 
-JP1  (PROVISIONED)
-      footprint: Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical
-      pin    1  Pin_1                -> +5V_ALT
-      pin    2  Pin_2                -> SW2_POLE
+C24  (100nF)
+      footprint: Capacitor_SMD:C_0402_1005Metric
+      pin    1                       -> +3V3
+      pin    2                       -> GND
+
+C25  (100nF)
+      footprint: Capacitor_SMD:C_0402_1005Metric
+      pin    1                       -> +3V3
+      pin    2                       -> GND
+
+C26  (100nF)
+      footprint: Capacitor_SMD:C_0402_1005Metric
+      pin    1                       -> +3V3
+      pin    2                       -> GND
 
 R8  (10k)
       footprint: Resistor_SMD:R_0402_1005Metric
@@ -614,6 +749,16 @@ R11  (10k)
       pin    1                       -> +3V3
       pin    2                       -> SW_SENSE_4
 
+R41  (4.7k)
+      footprint: Resistor_SMD:R_0402_1005Metric
+      pin    1                       -> +3V3
+      pin    2                       -> I2C_ID_SDA
+
+R42  (4.7k)
+      footprint: Resistor_SMD:R_0402_1005Metric
+      pin    1                       -> +3V3
+      pin    2                       -> I2C_ID_SCL
+
 SW1  (SSSS711403)
       footprint: teacup-carrier:SW-TH_SSSS711403
       pin    1                       -> SW_SENSE_1
@@ -627,7 +772,7 @@ SW2  (SSSS711403)
       footprint: teacup-carrier:SW-TH_SSSS711403
       pin    1                       -> EN_SW_BMC
       pin    2                       -> (not connected)
-      pin    3                       -> SW2_POLE
+      pin    3                       -> +5V_ALT
       pin    4                       -> EN_SW_ALT
       pin    5                       -> (not connected)
       pin    6                       -> (not connected)
@@ -706,11 +851,11 @@ U11  (DIP-8 Socket)
 U12  (TPS2053BDR)
       footprint: Package_SO:SOIC-16_3.9x9.9mm_P1.27mm
       pin    1  GND                  -> GND
-      pin    2  IN1                  -> USB1_VBUS_IN
+      pin    2  IN1                  -> +5V_SW
       pin    3  EN1                  -> USB_EN1
       pin    4  EN2                  -> USB_EN2
       pin    5  GND                  -> GND
-      pin    6  IN2                  -> USB2_VBUS_IN
+      pin    6  IN2                  -> +5V_SW
       pin    7  EN3                  -> USB_EN3
       pin    8  NC                   -> (not connected)
       pin    9  NC                   -> (not connected)
@@ -762,6 +907,21 @@ U15  (TCA9555PWR)
 
 ### CARRIER PHYSICAL I/O
 --------------------------------------------------------------------------------
+
+C27  (10uF)
+      footprint: Capacitor_SMD:C_0805_2012Metric
+      pin    1                       -> +5V_BMC
+      pin    2                       -> GND
+
+C28  (10uF)
+      footprint: Capacitor_SMD:C_0805_2012Metric
+      pin    1                       -> +5V_ALT
+      pin    2                       -> GND
+
+C29  (10uF)
+      footprint: Capacitor_SMD:C_0805_2012Metric
+      pin    1                       -> DCJACK_VBUS
+      pin    2                       -> GND
 
 J2  (TYPE-C-31-M-12)
       footprint: Connector_USB:USB_C_Receptacle_HRO_TYPE-C-31-M-12

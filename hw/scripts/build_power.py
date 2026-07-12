@@ -97,7 +97,7 @@ pin_net(P1(3), "U1_EN", "left")              # EN
 s.flag("GND", P1(4), "P", "left")            # MODE
 s.flag("GND", P1(5), "P", "left")            # FSEL
 pin_net(P1(6), "PG_VCORE", "left")           # PG (open-drain, R2 pulls up)
-pin_net(P1(12), "VCORE_FB", "right")         # FB
+pin_net(P1(12), "VCORE_FB_SEL", "right")     # FB -- jumper common pole, see JP2-JP6 below
 s.flag("GND", P1(11), "P", "right")          # GND
 pin_net(P1(10), "U1_SS", "right")            # SS/TR
 pin_net(P1(9), "U1_VCC", "right")            # VCC
@@ -128,7 +128,7 @@ P2 = lambda n: s.pin(U2, u2x, u2y, 0, str(n))
 s.flag("GND", P2(1), "P", "left")            # GND
 pin_net(P2(2), "U2_SW", "left")              # SW
 pin_net(P2(3), "+5V_SW", "left")             # VIN
-pin_net(P2(4), "VDDR_FB", "right")           # FB
+pin_net(P2(4), "VDDR_FB_SEL", "right")       # FB -- jumper common pole, see JP7-JP10 below
 pin_net(P2(5), "U2_EN", "right")             # EN
 pin_net(P2(6), "U2_BST", "right")            # BST
 
@@ -157,7 +157,7 @@ py7 = S(120)
 vert2("Device:C", "C16", "10uF", S(20), py7, "+5V_SW", GNDF, "Capacitor_SMD:C_0805_2012Metric")
 vert2("Device:C", "C17", "100nF", S(29), py7, "U7_BST", "U7_SW", "Capacitor_SMD:C_0402_1005Metric")
 vert2("Device:C", "C18", "22uF", S(38), py7, "+3V3", GNDF, "Capacitor_SMD:C_0805_2012Metric")
-vert2("Device:R", "R5", "100k", S(47), py7, P3V3F, "U7_EN", "Resistor_SMD:R_0402_1005Metric")
+vert2("Device:R", "R5", "100k", S(47), py7, "+5V_SW", "U7_EN", "Resistor_SMD:R_0402_1005Metric")
 # fixed 3.3V feedback divider: +3V3 -- R6 -- P3V3_FB -- R7 -- GND
 vert2("Device:R", "R6", "31.6k", S(56), py7, P3V3F, "P3V3_FB", "Resistor_SMD:R_0402_1005Metric")
 vert2("Device:R", "R7", "10k", S(65), py7, "P3V3_FB", GNDF, "Resistor_SMD:R_0402_1005Metric")
@@ -298,10 +298,10 @@ pin_net(P3(2), "I2C_PWR_SCL", "left")        # SCL
 pin_net(P3(3), "I2C_PWR_SDA", "left")        # SDA
 s.flag("GND", P3(4), "P", "left")            # VSS
 s.flag("GND", P3(5), "P", "left")            # P1B
-pin_net(P3(6), "VDDR_FB", "left")            # P1W
+pin_net(P3(6), "VDDR_FB_DIGIPOT", "left")    # P1W -- one jumper throw, not hard-wired to FB anymore
 pin_net(P3(7), "VDDR", "left")               # P1A
 pin_net(P3(8), "VCORE", "right")             # P0A
-pin_net(P3(9), "VCORE_FB", "right")          # P0W
+pin_net(P3(9), "VCORE_FB_DIGIPOT", "right")  # P0W -- one jumper throw, not hard-wired to FB anymore
 s.flag("GND", P3(10), "P", "right")          # P0B
 s.flag("+3V3", P3(11), "P", "right")         # WP
 s.flag("GND", P3(12), "P", "right")          # A2
@@ -309,6 +309,100 @@ s.flag("GND", P3(13), "P", "right")          # A1
 s.flag("+3V3", P3(14), "P", "right")         # VDD
 
 vert2("Device:C", "C12", "100nF", S(200), S(130), P3V3F, GNDF, "Capacitor_SMD:C_0402_1005Metric")
+
+# I2C_PWR bus pull-ups (digipot U3 + GPIO expander U15 on the bmc sheet,
+# master on ESP32 GPIO4/5) -- neither device supplies its own, and I2C is
+# open-drain, so without these the bus simply doesn't work. 4.7k to +3V3,
+# standard value for a short, low-device-count, carrier-local bus.
+vert2("Device:R", "R25", "4.7k", S(209), S(130), P3V3F, "I2C_PWR_SDA", "Resistor_SMD:R_0402_1005Metric")
+vert2("Device:R", "R26", "4.7k", S(218), S(130), P3V3F, "I2C_PWR_SCL", "Resistor_SMD:R_0402_1005Metric")
+
+# ============ VCORE/VDDR voltage-select jumpers ============
+# Explicit user direction: replace "trust the digipot's NV memory" as the
+# power-up safety story with a hardware-deterministic default. U1/U2's FB
+# pins (VCORE_FB_SEL / VDDR_FB_SEL above) are now the common pole of a
+# jumper bank, not hard-wired to the digipot wiper. Every candidate divider
+# -- 4 fixed presets for VCORE, 3 for VDDR, plus the digipot itself as one
+# more candidate -- stays permanently powered across VOUT/GND regardless of
+# jumper position (each draws only ~50-100uA, negligible against a
+# multi-amp buck), so only the SELECTED network's midpoint is ever
+# electrically tied to FB; the rest just idle. Populate exactly one shunt
+# per regulator -- none leaves FB floating (dangerous), two shorts two
+# dividers together (wrong, undefined voltage). Preset values computed from
+# each buck's own FB reference (AP62600SJ-7: 0.6V, AP62300WU-7: 0.8V) via
+# VOUT = VFB*(1+Rtop/Rbottom), Rbottom=10.0k shared reference, snapped to
+# approximate E96 1% steps and deliberately biased slightly LOW rather than
+# high -- safer to undervolt an unknown SoC than overvolt it. Verify exact
+# E96 values against the real table before finalizing the BOM.
+#
+# "Computer" position routes FB to the digipot wiper exactly as before, so
+# the EEPROM-on-interposer -> BMC-reads-it -> BMC-writes-digipot flow (SS7)
+# still works whenever that position is deliberately selected -- it just
+# can no longer influence the rail from any OTHER jumper position, which is
+# what makes the preset positions safe regardless of digipot/EEPROM state.
+# This is why JP1 and the mandatory bring-up checklist (formerly gating
+# SW2, see bmc sheet) are gone: the checklist existed only to manage the
+# exact risk this jumper bank now prevents in hardware. The user now sets
+# these jumpers by hand to match whichever interposer/SoC is seated --
+# manual, but that manual step is what removes the unsafe window.
+
+def preset_divider(rtop_ref, rtop_val, rbot_ref, x, y, rail, mid_net):
+    vert2("Device:R", rtop_ref, rtop_val, x, y, rail, mid_net, "Resistor_SMD:R_0402_1005Metric")
+    vert2("Device:R", rbot_ref, "10.0k", x + S(9), y, mid_net, GNDF, "Resistor_SMD:R_0402_1005Metric")
+
+CONNLIB_GENERIC = "/usr/share/kicad/symbols/Connector_Generic.kicad_sym"
+s.ensure_symbol(CONNLIB_GENERIC, "Conn_01x02", "Connector_Generic:Conn_01x02")
+JHDR = "Connector_Generic:Conn_01x02"
+JFP = "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+
+def jumper(ref, val, x, y, pole_net, throw_net):
+    # Ref/value pushed above/below the pin span (matching the headers
+    # sheet's proven convention) rather than vert2's default beside-the-body
+    # offset -- the pole/throw net labels here (VCORE_FB_SEL etc.) are long
+    # enough to run into a close-beside ref/value at this tight jumper
+    # pitch. Confirmed via check_overlaps.py.
+    s.place(JHDR, ref, val, x, y, 0, footprint=JFP,
+            ref_at=(x + S(2), y + S(4), 0), value_at=(x + S(2), y - S(4), 0))
+    p1 = s.pin(JHDR, x, y, 0, "1")
+    p2 = s.pin(JHDR, x, y, 0, "2")
+    pin_net(p1, pole_net, "up")
+    pin_net(p2, throw_net, "down")
+
+# Placed BELOW the existing rows, side by side (VCORE then VDDR in X) rather
+# than stacked in Y -- reusing the same x range already in use plus modest
+# extension, staying well clear of both the bmc sheet (merge dx=S(240)) and
+# the connector sheet (merge dy=S(180)) territories post-merge, and with
+# generous row-to-row Y spacing so divider/jumper label text doesn't run
+# into the next row. Confirmed clean via check_overlaps.py, not assumed.
+# ---- VCORE: 4 presets (0.8/0.9/1.0/1.1V) + digipot, 5-way select ----
+pv_y = S(150)
+s.text("VCORE VOLTAGE SELECT", S(20), pv_y - S(6), 0, size=1.5, bold=True)
+preset_divider("R27", "3.32k", "R28", S(20), pv_y, "VCORE", "VCORE_FB_0V8")
+preset_divider("R29", "4.99k", "R30", S(38), pv_y, "VCORE", "VCORE_FB_0V9")
+preset_divider("R31", "6.65k", "R32", S(56), pv_y, "VCORE", "VCORE_FB_1V0")
+preset_divider("R33", "8.25k", "R34", S(74), pv_y, "VCORE", "VCORE_FB_1V1")
+
+jv_y = S(182)
+jumper("JP2", "0.8V", S(20), jv_y, "VCORE_FB_SEL", "VCORE_FB_0V8")
+jumper("JP3", "0.9V", S(29), jv_y, "VCORE_FB_SEL", "VCORE_FB_0V9")
+jumper("JP4", "1.0V", S(38), jv_y, "VCORE_FB_SEL", "VCORE_FB_1V0")
+jumper("JP5", "1.1V", S(47), jv_y, "VCORE_FB_SEL", "VCORE_FB_1V1")
+jumper("JP6", "COMPUTER", S(56), jv_y, "VCORE_FB_SEL", "VCORE_FB_DIGIPOT")
+
+# ---- VDDR: 3 presets (1.35/1.5/1.8V) + digipot, 4-way select -- to the
+# right of VCORE's block, same two Y rows, not below it. Kept tighter/
+# further left than a first pass (which reached x=190.5, colliding with U3
+# the digipot, sitting at that same x) -- last column now ends at x=141*1.27
+# =179.07, clear of U3's body/value text.
+s.text("VDDR VOLTAGE SELECT", S(100), pv_y - S(6), 0, size=1.5, bold=True)
+preset_divider("R35", "6.81k", "R36", S(100), pv_y, "VDDR", "VDDR_FB_1V35")
+preset_divider("R37", "8.66k", "R38", S(114), pv_y, "VDDR", "VDDR_FB_1V5")
+preset_divider("R39", "12.4k", "R40", S(128), pv_y, "VDDR", "VDDR_FB_1V8")
+
+jumper("JP7", "1.35V", S(100), jv_y, "VDDR_FB_SEL", "VDDR_FB_1V35")
+jumper("JP8", "1.5V", S(109), jv_y, "VDDR_FB_SEL", "VDDR_FB_1V5")
+jumper("JP9", "1.8V", S(118), jv_y, "VDDR_FB_SEL", "VDDR_FB_1V8")
+jumper("JP10", "COMPUTER", S(127), jv_y, "VDDR_FB_SEL", "VDDR_FB_DIGIPOT")
 
 out = s.render("Power", str(uuid.uuid4()), "/e91d090e-0b5e-4716-96ce-185f84fa3402", "2", paper="A3")
 open("/home/administrator/projects/teacup-neo/hw/sheets/power.kicad_sch", "w").write(out)

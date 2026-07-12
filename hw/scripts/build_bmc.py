@@ -10,7 +10,6 @@ from schgen import Sheet, GRID
 TC = "/home/administrator/projects/teacup-neo/hw/teacup-carrier.kicad_sym"
 DEV = "/usr/share/kicad/symbols/Device.kicad_sym"
 PWR = "/usr/share/kicad/symbols/power.kicad_sym"
-CONNLIB_GENERIC = "/usr/share/kicad/symbols/Connector_Generic.kicad_sym"
 
 def S(n):
     return round(n * GRID, 2)
@@ -34,7 +33,7 @@ LABEL_ANGLE = {"right": 0, "left": 180, "up": 90, "down": 270}
 # to hard-reset the co-processor per ESP-Hosted's own reference wiring
 # (its "Reset" signal ties straight to the co-processor's EN/RST pin, not
 # a GPIO), so it can no longer stay local.
-LOCAL_NETS = {"U8_BOOT", "ESP32_CONSOLE_RX", "ESP32_CONSOLE_TX", "EXP_INT", "SW2_POLE"}
+LOCAL_NETS = {"U8_BOOT", "ESP32_CONSOLE_RX", "ESP32_CONSOLE_TX", "EXP_INT"}
 
 def pin_net(pin_xy, net, direction):
     s.label(net, pin_xy[0], pin_xy[1], LABEL_ANGLE[direction],
@@ -157,42 +156,25 @@ vert2("Device:R", "R11", "10k", S(169), S(104), P3V3F, "SW_SENSE_4", "Resistor_S
 # present, forcing it onto +5V_SW is only ever wanted with firmware
 # running anyway (you're already talking to the ESP32 to know to do it),
 # so it's not a hardware-only scenario the way the ALT case is.
+#
+# Pole (pin 3) ties straight to +5V_ALT -- no gating jumper. The digipot
+# first-power-up overvoltage risk this used to guard against (JP1 + a
+# mandatory bring-up checklist, see git history) is now handled by the
+# VCORE/VDDR voltage-select jumpers on the power sheet instead: with FB
+# routed to a fixed preset divider rather than the digipot, VCORE/VDDR are
+# hardware-deterministic regardless of what SW2 does or what's in the
+# digipot's NV memory. The user sets those jumpers by hand for whichever
+# interposer is seated -- that manual step is what makes it safe to remove
+# this gate.
 SW2 = "teacup-carrier:SSSS711403"
 sw2x, sw2y = S(140), S(220)
 s.place(SW2, "SW2", "SSSS711403", sw2x, sw2y, 0,
         footprint="teacup-carrier:SW-TH_SSSS711403",
         ref_at=(sw2x, sw2y + S(4), 0), value_at=(sw2x, sw2y + S(6), 0))
 ic_pin(SW2, sw2x, sw2y, 1, "EN_SW_BMC")
-ic_pin(SW2, sw2x, sw2y, 3, "SW2_POLE")
+ic_pin(SW2, sw2x, sw2y, 3, "+5V_ALT")
 ic_pin(SW2, sw2x, sw2y, 4, "EN_SW_ALT")
 # pins 2/5/6 deliberately NC per the confirmed datasheet pinout
-
-# ============ Provisioning jumper (JP1): gates SW2 until digipot is safe ============
-# Both of SW2's throws bring +5V_SW up via pure hardware, with U1's EN
-# pulled straight to +5V_SW (no BMC gate on the rail itself) -- meaning
-# on a factory-fresh board, SW2 can enable VCORE before the BMC has ever
-# run to correct the digipot off its factory mid-scale default, which
-# computes to ~1.2V on this buck's 0.6V reference (checked against the
-# MCP4661 and AP62600 datasheets) -- a real overvoltage against every
-# SoC's 0.8-1.1V VCORE target. There's no electrical way to gate this on
-# "has the digipot actually been programmed" without I2C access, which
-# needs the ESP32 running -- circular, defeats the point of a firmware-
-# independent override. JP1 is a manual, physical stand-in for that
-# condition instead: open as shipped, so SW2 is entirely inert (both
-# throws dead) until a technician bridges it -- which the bring-up
-# procedure (see docs/UNIVERSAL.md) requires doing only AFTER powering
-# the board via J9 once and confirming firmware has written a safe
-# VCORE/VDDR value into the digipot's non-volatile memory. Sits on the
-# pole (SW2_POLE), not either individual throw, so it gates both -- the
-# force-BMC throw brings the rail up exactly the same unguarded way.
-JP1 = "Connector_Generic:Conn_01x02"
-s.ensure_symbol(CONNLIB_GENERIC, "Conn_01x02", "Connector_Generic:Conn_01x02")
-jp1x, jp1y = S(160), S(220)
-s.place(JP1, "JP1", "PROVISIONED", jp1x, jp1y, 0,
-        footprint="Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical",
-        ref_at=(jp1x + S(2), jp1y - S(1), 0), value_at=(jp1x + S(2), jp1y + S(1), 0))
-pin_net(s.pin(JP1, jp1x, jp1y, 0, "1"), "+5V_ALT", "left")
-pin_net(s.pin(JP1, jp1x, jp1y, 0, "2"), "SW2_POLE", "left")
 
 # ============ Primary NOR flash (U13, soldered SOIC-8 W25Q32JVSS) ============
 # Matches the reference teacup-t41 board's U4/U5 pair: both NOR chips share
@@ -212,6 +194,7 @@ ic_pin(SOIC_NOR, n4x, n4y, 5, "SFC_IO0")    # DI
 ic_pin(SOIC_NOR, n4x, n4y, 6, "SFC_CLK")    # CLK
 ic_pin(SOIC_NOR, n4x, n4y, 7, "SFC_IO3")    # IO3
 ic_pin(SOIC_NOR, n4x, n4y, 8, P3V3F)        # VCC (top)
+vert2("Device:C", "C24", "100nF", n4x + S(22), n4y, P3V3F, GNDF, "Capacitor_SMD:C_0402_1005Metric")
 
 # ============ Carrier DIP8 NOR socket (U11, recovery/alternate flash) ============
 DIP = "teacup-carrier:DIP8_NOR_SOCKET"
@@ -227,6 +210,7 @@ ic_pin(DIP, dx, dy, 5, "SFC_IO0")     # DI
 ic_pin(DIP, dx, dy, 6, "SFC_CLK")     # CLK
 ic_pin(DIP, dx, dy, 7, "SFC_IO3")     # IO3
 ic_pin(DIP, dx, dy, 8, P3V3F)         # VCC (top)
+vert2("Device:C", "C25", "100nF", dx + S(22), dy, P3V3F, GNDF, "Capacitor_SMD:C_0402_1005Metric")
 
 # ============ USB power switch (U12, TPS2053BDR) ============
 TPS = "teacup-carrier:TPS2053BDR"
@@ -236,7 +220,7 @@ s.place(TPS, "U12", "TPS2053BDR", tx, ty, 0,
         ref_at=(tx, ty - S(9), 0), value_at=(tx, ty + S(9), 0))
 U12_PINS = {
     1: GNDF, 5: GNDF,
-    2: "USB1_VBUS_IN", 6: "USB2_VBUS_IN",
+    2: "+5V_SW", 6: "+5V_SW",   # was dangling (USB1/2_VBUS_IN, tied to nothing) -- real fix
     3: "USB_EN1", 4: "USB_EN2", 7: "USB_EN3",
     11: "USB3_VBUS_OUT", 14: "USB2_VBUS_OUT", 15: "USB1_VBUS_OUT",
     12: "USB_OC3", 13: "USB_OC2", 16: "USB_OC1",
@@ -277,6 +261,14 @@ ic_pin(EXP, ex, ey, 21, GNDF)    # A0
 ic_pin(EXP, ex, ey, 22, "I2C_PWR_SCL")
 ic_pin(EXP, ex, ey, 23, "I2C_PWR_SDA")
 ic_pin(EXP, ex, ey, 24, P3V3F)
+vert2("Device:C", "C26", "100nF", ex, ey + S(35), P3V3F, GNDF, "Capacitor_SMD:C_0402_1005Metric")
+
+# I2C_ID bus pull-ups (crosses J1 to whichever interposer's own EEPROM is
+# seated, SS7 -- master on ESP32 GPIO6/7). Live on the carrier, not the
+# interposer, because the carrier side is always populated regardless of
+# which (or whether any) interposer is plugged in. 4.7k to +3V3.
+vert2("Device:R", "R41", "4.7k", S(166), S(20), P3V3F, "I2C_ID_SDA", "Resistor_SMD:R_0402_1005Metric")
+vert2("Device:R", "R42", "4.7k", S(175), S(20), P3V3F, "I2C_ID_SCL", "Resistor_SMD:R_0402_1005Metric")
 
 out = s.render("BMC - ESP32-S3", str(uuid.uuid4()), "/0f27921f-7420-42c8-af54-47a231c1828e", "4", paper="A3")
 open("/home/administrator/projects/teacup-neo/hw/sheets/bmc.kicad_sch", "w").write(out)

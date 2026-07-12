@@ -24,6 +24,7 @@ s.ensure_symbol(CONNLIB, "Barrel_Jack_Switch", "Connector:Barrel_Jack_Switch")
 s.ensure_symbol(AUDIO, "AudioJack4_Ground", "Connector_Audio:AudioJack4_Ground")
 s.ensure_symbol(TC, "SFW15R-2STE1LF_C3167933", "teacup-carrier:SFW15R-2STE1LF_C3167933")
 s.ensure_symbol(DEV, "R", "Device:R")
+s.ensure_symbol(DEV, "C", "Device:C")
 s.ensure_symbol(DEV, "Q_PMOS", "Device:Q_PMOS")
 s.ensure_symbol(PWR, "GND", "power:GND")
 s.ensure_symbol(PWR, "+3V3", "power:+3V3")
@@ -108,6 +109,9 @@ ic_pins(J9, j9x, j9y, {
 })
 vert2("Device:R", "R18", "5.1k", S(115), S(66), "USBC2_CC1", GNDF, "Resistor_SMD:R_0402_1005Metric")
 vert2("Device:R", "R19", "5.1k", S(124), S(66), "USBC2_CC2", GNDF, "Resistor_SMD:R_0402_1005Metric")
+# Bulk/bypass cap right at the raw VBUS input, before it reaches U4 (power
+# sheet) -- was previously undecoupled all the way from the connector.
+vert2("Device:C", "C27", "10uF", S(65), S(100), "+5V_BMC", GNDF, "Capacitor_SMD:C_0805_2012Metric")
 
 # ============ Priority power-OR (Q1/Q2): DC jack over alt USB-C ============
 # Two P-FETs OR DCJACK_VBUS and ALTUSB_VBUS onto +5V_ALT, which feeds the
@@ -145,6 +149,10 @@ q_pin(Q_PMOS, q2x, q2y, "D", "+5V_ALT")
 q_pin(Q_PMOS, q2x, q2y, "G", "Q2_GATE")
 vert2("Device:R", "R16", "4.7k", S(105), S(145), "DCJACK_VBUS", "Q2_GATE", "Resistor_SMD:R_0402_1005Metric")
 vert2("Device:R", "R17", "100k", S(114), S(145), "Q2_GATE", GNDF, "Resistor_SMD:R_0402_1005Metric")
+# Bulk/bypass cap at the OR'd output node, before +5V_ALT reaches U14
+# (power sheet) -- was previously undecoupled all the way from Q1/Q2's
+# drains.
+vert2("Device:C", "C28", "10uF", S(120), S(160), "+5V_ALT", GNDF, "Capacitor_SMD:C_0805_2012Metric")
 
 # ============ USB-A (J3): host port to interposer SoC ============
 J3 = "Connector:USB_A"
@@ -189,6 +197,9 @@ ic_pins(J5, j5x, j5y, {
     "3": "DCJACK_PRESENT",
 })
 vert2("Device:R", "R14", "10k", S(85), S(160), P3V3F, "DCJACK_PRESENT", "Resistor_SMD:R_0402_1005Metric")
+# Bulk/bypass cap right at the barrel jack -- user-facing external power
+# input, previously had zero local capacitance before Q1's source.
+vert2("Device:C", "C29", "10uF", S(100), S(160), "DCJACK_VBUS", GNDF, "Capacitor_SMD:C_0805_2012Metric")
 
 # ============ Headphone jack (J6): HPOUTL only, mono per UNIVERSAL.md ============
 J6 = "Connector_Audio:AudioJack4_Ground"

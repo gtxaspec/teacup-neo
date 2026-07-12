@@ -200,6 +200,37 @@ undervolt headroom, and stability margins — real characterization, LLM-driven.
   0.8 V part. The NV pot retains its setting across power cycles; the BMC-gated
   enable covers the very first boot. This is the resolution to mode-B FB safety.
 
+**VCORE/VDDR voltage-select jumpers — hardware-deterministic default,
+supersedes the digipot-safety procedure above (decided).** The sequencing
+rule above depends on the BMC having actually run at least once to write a
+safe value into the digipot's NV memory — true after first bring-up, but the
+same gap reopens every time an interposer is swapped for a different SoC: the
+digipot's *stored* value belongs to whatever was seated last, not what's
+seated now. Rather than trust NV memory (or gate power behind a manual
+one-time procedure, the earlier `JP1`/bring-up-checklist approach — see git
+history, now removed), `U1`/`U2`'s FB pins are the common pole of a physical
+jumper bank instead of being hard-wired to the digipot wiper:
+- **4 fixed presets for VCORE** (0.8/0.9/1.0/1.1 V, covering every SoC in §3's
+  rail table) **+ 3 for VDDR** (1.35/1.5/1.8 V), each a plain two-resistor
+  divider off the buck's own FB reference (0.6 V / 0.8 V respectively),
+  permanently powered across VOUT/GND regardless of jumper position (~50-100
+  µA each, negligible) so only the *selected* network's midpoint is ever
+  electrically tied to FB.
+- **One more position routes FB to the digipot wiper exactly as before** — the
+  EEPROM-on-interposer → BMC-reads-it → BMC-writes-digipot flow (§7) still
+  works whenever this position is deliberately selected, and *only* then.
+- Populate exactly one shunt per regulator — none leaves FB floating
+  (dangerous), two shorts two dividers together (undefined voltage).
+- **The user sets these by hand** for whichever interposer is seated. Manual,
+  but that's what removes the unsafe window: a preset position is correct
+  voltage from the very first switching cycle, with zero dependency on
+  firmware, I²C, or what happened to be left in NV memory from the last
+  interposer. Values deliberately biased slightly low rather than high —
+  safer to undervolt an unknown SoC than overvolt it.
+- Consequence: `SW2`'s pole now ties straight to `+5V_ALT`, no gating jumper —
+  the overvoltage risk that gate existed to prevent is now prevented in
+  hardware on the FB path itself, regardless of what `SW2` or the digipot do.
+
 ---
 
 ## 3. SoC input-rail reference (T10 → A1)
@@ -871,8 +902,9 @@ no shared VBUS conductor to design around in the first place. Three named
   number for BOM commonality), can override either branch on directly — a
   genuine **ON-OFF-ON**, same structural pattern as `SW1` (pole = a fixed
   rail, the two throws are the signals it connects to when engaged, not the
-  reverse): the pole (pin 3) is tied to `+5V_ALT` itself — through `JP1`, a
-  provisioning jumper open as shipped, see §10's digipot-safety entry — throw
+  reverse): the pole (pin 3) is tied directly to `+5V_ALT` — no gating jumper
+  (an earlier `JP1` provisioning jumper here is removed, §2's voltage-select
+  jumpers now cover the risk it existed for) — throw
   1 connects it to `EN_SW_BMC`, throw 4 connects it to `EN_SW_ALT`. **Force BMC**
   (throw 1, forces the BMC branch on), **off / ESP32 control** (center,
   neither throw engaged — both branches default off via their pulldowns,
@@ -1091,53 +1123,39 @@ handful of the 260 positions, already part of the SoC signal set (§8).
 **Deferred (decide later):** none outstanding.
 
 **Decided:**
-- **Digipot first-power-up safety gap — resolved with a mandatory bring-up
-  step plus a hardware gate, not a hope.** §2's safe-sequencing rule (BMC
-  sets the digipot, *then* enables the rail) depends on the BMC having run
-  at least once to program a safe VCORE/VDDR value into non-volatile
-  memory — and `SW2`'s force-ALT override (§9) can bring `+5V_SW` up with
-  the ESP32 completely unpowered, since `U1`'s `EN` is pulled straight to
-  `+5V_SW` with no BMC gate on the rail itself. Checked whether the
-  digipot's factory-default wiper (confirmed from Microchip's own
-  datasheet, DS22107A Table 4-2: mid-scale, `0x80` of 256, for the exact
-  `-104`/100 kΩ code used here) happens to be safe — it doesn't: on
-  `AP62600SJ-7`'s confirmed 0.6 V feedback reference, mid-scale computes to
-  **VCORE ≈ 1.2 V**, 9-50% over every T-series target (0.8-1.1 V) depending
-  on the part. Ruled out as a fix; it's the failure mode itself. A pure
-  hardware gate on "has the digipot actually been programmed" isn't
-  possible either — checking requires I²C, which requires the ESP32
-  running, which is circular (defeats the point of a firmware-independent
-  override). Resolution: **`JP1`, a 2-pin header on `SW2`'s pole**
-  (`+5V_ALT` → `JP1` → `SW2_POLE`, gating *both* throws since they share
-  the pole) **— open as shipped, so `SW2` is entirely inert until a
-  technician bridges it.** Before `JP1` is bridged, `SW2` simply does
-  nothing — the board can only be brought up through `J9`, where the BMC is
-  guaranteed to be in the loop. This is a one-time manufacturing/bring-up
-  step, not a per-use requirement: `JP1`, once bridged, stays bridged for
-  the life of the board.
-
-  **Mandatory bring-up checklist (once per board, before `JP1` is ever bridged):**
-  - [ ] Leave `JP1` unbridged/unpopulated — this is the as-shipped state;
-        don't populate it during assembly.
-  - [ ] Power the board via `J9` only (BMC's dedicated USB-C). Do **not**
-        connect `+5V_ALT` (`J2`/`J5`) or use `SW2` yet.
-  - [ ] Confirm the ESP32 has booted — console over USB-CDC or WiFi reachable.
-  - [ ] Have firmware write the correct VCORE/VDDR wiper values for the
-        specific interposer/SoC that will ship on this board into the
-        digipot's (`U3`) non-volatile memory (not just the volatile
-        register — must be the NV write so it survives power cycles).
-  - [ ] Read the digipot back over I²C and confirm the NV wiper values match
-        what was just written, not the factory mid-scale default (`0x80`).
-  - [ ] Power down, then power back up via `J9` alone again, and confirm the
-        digipot still reads the programmed (not factory-default) value —
-        proves the NV write actually persisted, not just the volatile copy.
-  - [ ] Only now, bridge `JP1` (solder a shorting link or install a shunt).
-  - [ ] Power-cycle once more and confirm `SW2`'s force-ALT/force-BMC throws
-        behave as expected before the board is considered done.
-
-  Skipping straight to bridging `JP1` on an unprogrammed board reintroduces
-  the exact overvoltage failure mode this whole mechanism exists to prevent
-  — see the calculation above.
+- **Digipot first-power-up safety gap — superseded, resolved in hardware
+  instead of by procedure.** Originally resolved with `JP1` (a jumper gating
+  `SW2`'s pole, open as shipped) plus a mandatory one-time bring-up checklist
+  — see git history for the full original writeup. That approach only ever
+  covered *first* power-up, though: the same gap reopens every time an
+  interposer is swapped for a different SoC, since the digipot's NV memory
+  holds whatever the *previous* interposer needed, not the new one. Root
+  cause confirmed from Microchip's own datasheet (DS22107A Table 4-2): the
+  digipot's factory/unprogrammed wiper is mid-scale (`0x80` of 256), which
+  on `AP62600SJ-7`'s 0.6 V feedback reference computes to **VCORE ≈ 1.2 V** —
+  9-50% over every T-series target (0.8-1.1 V) depending on the part, a real
+  overvoltage risk, not a theoretical one. Resolved for good by §2's
+  VCORE/VDDR voltage-select jumpers: FB no longer reaches the digipot at all
+  except in the explicit "computer" jumper position, so the rail's actual
+  voltage is a hardware fact independent of NV memory, EEPROM state, or
+  which interposer was seated last. `JP1` and the checklist are removed —
+  nothing left for them to guard.
+- **Passive-component audit — three real bugs found and fixed, not just
+  missing parts.** (1) `U7` (the `+3V3` buck)'s `EN` pin was pulled up from
+  `+3V3` — its own output — a startup deadlock (compare `U1`, correctly
+  pulled from `+5V_SW`, an independent upstream rail); repointed to
+  `+5V_SW`. (2) `U12` (`TPS2053BDR`, USB power distribution)'s `IN1`/`IN2`
+  were entirely unconnected — nothing fed the chip, so its outputs could
+  never be powered; wired to `+5V_SW`. (3) Neither I²C bus (`I2C_PWR_SDA/
+  SCL`, the digipot + GPIO-expander bus, nor `I2C_ID_SDA/SCL`, the
+  carrier-ID bus crossing to whichever interposer is seated) had a single
+  pull-up resistor anywhere — added 4.7 kΩ to `+3V3` on both, on the
+  carrier side (not the interposer) since the carrier is always populated
+  regardless of what's plugged into `J1`. Also added local decoupling
+  (`U3`/`U11`/`U13`/`U15` previously relied only on the power section's
+  distant bulk caps) and bulk/bypass caps on every raw external rail before
+  it reaches any regulator (`+5V_BMC` at `J9`, `+5V_ALT` at `Q1`/`Q2`,
+  `DCJACK_VBUS` at `J5`) — none had any local capacitance before.
 - **BMC gets its own dedicated USB-C (`J9`), isolated from the carrier's main
   power input (was an unflagged gap — the BMC's native USB had been sharing
   the main power-input connector, `J2`, so any USB-only debug session would
