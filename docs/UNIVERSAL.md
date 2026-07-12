@@ -948,6 +948,16 @@ either (the mounting holes are non-plated/NPTH, mechanical-only by
 definition); the jack's shield relies on mechanical contact with a grounded
 enclosure, not a PCB trace. Proven behavior, not a gap.
 
+**Two more broken footprint references found in the same audit, fixed.**
+`D1`/`D2` (PMEG2010ER) hardcoded `Diode_SMD:D_SOD-123W`, which doesn't exist
+in any installed library (`Diode_SMD` wasn't even registered in
+`fp-lib-table`) — corrected to `Diode_SMD:Nexperia_CFP3_SOD-123W`, the real
+footprint for this part's actual package, and registered the library.
+`U13` (W25Q32JVSS) hardcoded `Package_SO:SOIC-8_5.23x5.23mm_P1.27mm` — off
+by a rounding choice from the real footprint's name,
+`Package_SO:SOIC-8_5.3x5.3mm_P1.27mm`. Both are why the PCB's ERC showed 3
+`footprint_link_issues`; 0 after.
+
 **Control plane** (agent-facing API over USB-CDC *and/or* WiFi REST/MQTT/telnet):
 
 | Function | Mechanism | Silicon |

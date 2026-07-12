@@ -184,7 +184,7 @@ ic_pin(SW2, sw2x, sw2y, 4, "EN_SW_ALT")
 SOIC_NOR = "teacup-carrier:W25Q32JVSS"
 n4x, n4y = S(140), S(132)
 s.place(SOIC_NOR, "U13", "W25Q32JVSS", n4x, n4y, 0,
-        footprint="Package_SO:SOIC-8_5.23x5.23mm_P1.27mm",
+        footprint="Package_SO:SOIC-8_5.3x5.3mm_P1.27mm",
         ref_at=(n4x - S(10), n4y - S(10), 0), value_at=(n4x - S(10), n4y - S(8), 0))
 ic_pin(SOIC_NOR, n4x, n4y, 1, "NOR_U4_CE")  # ~CS
 ic_pin(SOIC_NOR, n4x, n4y, 2, "SFC_IO1")    # DO

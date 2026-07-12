@@ -13,4 +13,5 @@
   (lib (name "Inductor_SMD")(type "KiCad")(uri "/usr/share/kicad/footprints/Inductor_SMD.pretty")(options "")(descr ""))
   (lib (name "Connector_Audio")(type "KiCad")(uri "/usr/share/kicad/footprints/Connector_Audio.pretty")(options "")(descr ""))
   (lib (name "Connector_PinHeader_2.54mm")(type "KiCad")(uri "/usr/share/kicad/footprints/Connector_PinHeader_2.54mm.pretty")(options "")(descr ""))
+  (lib (name "Diode_SMD")(type "KiCad")(uri "/usr/share/kicad/footprints/Diode_SMD.pretty")(options "")(descr ""))
 )

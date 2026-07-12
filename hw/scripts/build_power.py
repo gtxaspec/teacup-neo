@@ -181,14 +181,14 @@ s.ensure_symbol(DEV, "D_Schottky", "Device:D_Schottky")
 
 d1x, d1y = S(108), S(10)
 s.place(DSCH, "D1", "PMEG2010ER", d1x, d1y, 0,
-        footprint="Diode_SMD:D_SOD-123W",
+        footprint="Diode_SMD:Nexperia_CFP3_SOD-123W",
         ref_at=(d1x, d1y - S(3), 0), value_at=(d1x, d1y + S(3), 0))
 pin_net(s.pin(DSCH, d1x, d1y, 0, "1"), "U5_VIN", "left")     # K
 pin_net(s.pin(DSCH, d1x, d1y, 0, "2"), "+5V_BMC", "right")   # A
 
 d2x, d2y = S(108), S(22)
 s.place(DSCH, "D2", "PMEG2010ER", d2x, d2y, 0,
-        footprint="Diode_SMD:D_SOD-123W",
+        footprint="Diode_SMD:Nexperia_CFP3_SOD-123W",
         ref_at=(d2x, d2y - S(3), 0), value_at=(d2x, d2y + S(3), 0))
 pin_net(s.pin(DSCH, d2x, d2y, 0, "1"), "U5_VIN", "left")     # K
 pin_net(s.pin(DSCH, d2x, d2y, 0, "2"), "+5V_ALT", "right")   # A

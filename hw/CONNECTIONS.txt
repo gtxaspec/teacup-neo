@@ -108,12 +108,12 @@ C23  (1nF_TBD)
       pin    2                       -> GND
 
 D1  (PMEG2010ER)
-      footprint: Diode_SMD:D_SOD-123W
+      footprint: Diode_SMD:Nexperia_CFP3_SOD-123W
       pin    1  K                    -> U5_VIN
       pin    2  A                    -> +5V_BMC
 
 D2  (PMEG2010ER)
-      footprint: Diode_SMD:D_SOD-123W
+      footprint: Diode_SMD:Nexperia_CFP3_SOD-123W
       pin    1  K                    -> U5_VIN
       pin    2  A                    -> +5V_ALT
 
@@ -868,7 +868,7 @@ U12  (TPS2053BDR)
       pin   16  OC1                  -> USB_OC1
 
 U13  (W25Q32JVSS)
-      footprint: Package_SO:SOIC-8_5.23x5.23mm_P1.27mm
+      footprint: Package_SO:SOIC-8_5.3x5.3mm_P1.27mm
       pin    1  ~{CS}                -> NOR_U4_CE
       pin    2  DO(IO1)              -> SFC_IO1
       pin    3  IO2                  -> SFC_IO2
