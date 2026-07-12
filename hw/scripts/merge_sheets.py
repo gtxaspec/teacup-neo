@@ -8,20 +8,19 @@ def S(n):
     return round(n * 1.27, 2)
 
 # (filename, x_offset, y_offset, display title)
-# Offsets chosen from each rebuilt sheet's measured extents (all coordinates
-# are 50mil-grid-aligned, and these offsets are multiples of 1.27 to keep
-# them that way): power 25-259 x 13-177, connector 30-318 x 38-198,
-# bmc 30-220 x 15-220, io 23-190 x 24-257. Quadrants with >=30mm gutters
-# on A0 (1189x841).
+# Offsets below match the user's manual GUI rearrangement of 2026-07-13 (each
+# quadrant dragged as one block; recovered by diffing symbol (at ...)
+# positions in the committed teacup-carrier.kicad_sch against a fresh rebuild
+# and confirming a single uniform delta per sheet). Do NOT reset these to
+# "recomputed" values without re-diffing against the live file first -- doing
+# so silently discards the user's placement on the next rebuild, which is
+# exactly what this comment exists to prevent.
 SHEETS = [
-    ("power", 0, 0, "POWER"),
-    ("connector", 0, S(180), "DDR4 UDIMM-288 CONNECTOR"),
-    ("bmc", S(240), 0, "BMC - ESP32-S3"),
-    ("io", S(480), 0, "CARRIER PHYSICAL I/O"),
-    # headers unshifted bbox: x 40.64-207.01, y 124.46-309.88 -- placed below
-    # io (x632.6-799.6,y24-257) and clear of connector (x30-318,y266.6-426.6),
-    # bmc (x334.8-524.8,y15-220) and power (x25-259,y13-177).
-    ("headers", S(480), S(280), "PIN BREAKOUT HEADERS"),
+    ("power", S(4), S(20), "POWER"),
+    ("connector", S(0), S(247), "DDR4 UDIMM-288 CONNECTOR"),
+    ("bmc", S(243), S(14), "BMC - ESP32-S3"),
+    ("io", S(480), S(23), "CARRIER PHYSICAL I/O"),
+    ("headers", S(292), S(254), "PIN BREAKOUT HEADERS"),
 ]
 
 def split_lib_symbols_and_body(text):
