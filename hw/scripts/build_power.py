@@ -243,7 +243,7 @@ pin_net(P4(9), "+5V_SW", "right")            # VOUT
 pin_net(P4(10), "+5V_SW", "right")           # VOUT
 pin_net(P4(11), "+5V_BMC", "right")          # VIN
 
-vert2("Device:C", "C13", "1nF_TBD", S(132), S(96), "U4_CT", GNDF, "Capacitor_SMD:C_0402_1005Metric")
+vert2("Device:C", "C13", "1nF", S(132), S(96), "U4_CT", GNDF, "Capacitor_SMD:C_0402_1005Metric")
 vert2("Device:R", "R4", "10k", S(150), S(96), P3V3F, "PG_SW5V", "Resistor_SMD:R_0402_1005Metric")
 
 # BMC-branch EN arbitration: GPIO drives through a 1k series resistor,
@@ -277,7 +277,7 @@ pin_net(P14(9), "+5V_SW", "right")           # VOUT
 pin_net(P14(10), "+5V_SW", "right")          # VOUT
 pin_net(P14(11), "+5V_ALT", "right")         # VIN
 
-vert2("Device:C", "C23", "1nF_TBD", S(192), S(96), "U14_CT", GNDF, "Capacitor_SMD:C_0402_1005Metric")
+vert2("Device:C", "C23", "1nF", S(192), S(96), "U14_CT", GNDF, "Capacitor_SMD:C_0402_1005Metric")
 vert2("Device:R", "R24", "10k", S(210), S(96), P3V3F, "PG_SW5V_ALT", "Resistor_SMD:R_0402_1005Metric")
 
 # ALT-branch EN arbitration -- same topology as the BMC branch, plus SW2's

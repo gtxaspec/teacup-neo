@@ -62,7 +62,7 @@ C12  (100nF)
       pin    1                       -> +3V3
       pin    2                       -> GND
 
-C13  (1nF_TBD)
+C13  (1nF)
       footprint: Capacitor_SMD:C_0402_1005Metric
       pin    1                       -> U4_CT
       pin    2                       -> GND
@@ -102,7 +102,7 @@ C20  (10uF)
       pin    1                       -> +1V8
       pin    2                       -> GND
 
-C23  (1nF_TBD)
+C23  (1nF)
       footprint: Capacitor_SMD:C_0402_1005Metric
       pin    1                       -> U14_CT
       pin    2                       -> GND
