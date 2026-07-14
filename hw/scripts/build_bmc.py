@@ -142,12 +142,12 @@ vert2("Device:R", "R11", "10k", S(169), S(104), P3V3F, "SW_SENSE_4", "Resistor_S
 # to GND, which collapsed to on-off-off: that throw was electrically
 # indistinguishable from center's own pulldown-default-low state whenever
 # GPIO wasn't actively fighting it). Now genuinely ON-OFF-ON:
-#   throw1 -> EN_SW_BMC : force the BMC branch (U4) on
+#   throw1 -> EN_SW_ALT : force the ALT branch (U14) on
 #   center               : neither forced, GPIO (through its own series
 #                           resistor on the power sheet) has full control,
 #                           defaults off via pulldown -- same safe idle
 #                           state as before
-#   throw4 -> EN_SW_ALT : force the ALT branch (U14) on
+#   throw4 -> EN_SW_BMC : force the BMC branch (U4) on
 # Pole sourced from +5V_ALT rather than +3V3_ALWAYS so the ALT-forcing
 # throw -- the one that matters most, since it's the only one useful when
 # the BMC's own USB-C is unpowered -- works without needing J9 plugged in.
@@ -171,9 +171,9 @@ sw2x, sw2y = S(140), S(220)
 s.place(SW2, "SW2", "SSSS711403", sw2x, sw2y, 0,
         footprint="teacup-carrier:SW-TH_SSSS711403",
         ref_at=(sw2x, sw2y + S(4), 0), value_at=(sw2x, sw2y + S(6), 0))
-ic_pin(SW2, sw2x, sw2y, 1, "EN_SW_BMC")
+ic_pin(SW2, sw2x, sw2y, 1, "EN_SW_ALT")
 ic_pin(SW2, sw2x, sw2y, 3, "+5V_ALT")
-ic_pin(SW2, sw2x, sw2y, 4, "EN_SW_ALT")
+ic_pin(SW2, sw2x, sw2y, 4, "EN_SW_BMC")
 # pins 2/5/6 deliberately NC per the confirmed datasheet pinout
 
 # ============ Primary NOR flash (U13, soldered SOIC-8 W25Q32JVSS) ============

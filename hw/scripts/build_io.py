@@ -232,26 +232,63 @@ s.place(J6, "J6", "AudioJack4_Ground", j6x, j6y, 0,
         footprint="Connector_Audio:Jack_3.5mm_PJ320D_Horizontal",
         ref_at=(j6x, j6y - S(6), 0), value_at=(j6x, j6y + S(6), 0))
 ic_pins(J6, j6x, j6y, {
+    # Full match to 3.3's own J10 (same jack, same footprint) -- verified
+    # directly against its PCB netlist, not assumed by generic "sleeve =
+    # ground" convention (which is wrong for this part: 3.3 actually grounds
+    # R2 and uses S for the mic signal). AudioJack4_Ground's "G" pin (a
+    # separate ground LUG) has no matching pad on the real
+    # Jack_3.5mm_PJ320D_Horizontal footprint at all -- that part only
+    # brings out T/R1/R2/S plus two non-plated mechanical holes -- so it's
+    # left unmapped rather than wired to a net with nowhere to land.
     "T": "HPOUTL",
-    "G": GNDF,
-    # R1/R2/S deliberately unconnected (mono-only)
+    "R1": "HPOUTL",
+    "R2": GNDF,
+    "S": "MICLP",
 })
 
 # ============ MIPI CSI FFC connectors (J7/J8) ============
-# Standard 15-pin CSI camera pinout (RPi/Arducam convention)
+# Physical pin-for-pin match to TeaCup(C)3.3's real J13 FFC connector --
+# verified directly against 3.3's own PCB netlist (12-30-23-Teacup.kicad_pcb-
+# revC.kicad_pcb), NOT the generic "RPi/Arducam" 15-pin CSI convention this
+# was originally (wrongly) built to. A sensor module built for 3.3 plugs
+# into this exact physical pin mapping; the previous generic version put
+# +3V3 on pin 1's neighbor GND, swapped the CLK/D0 lane order, and reversed
+# every differential pair's P/N polarity -- pin 1 alone would have put the
+# sensor's +3V3 input directly onto this board's GND.
+# 3.3 also drives pin 5 (sensor enable) through a 3-pin jumper (its J15:
+# GPIO on one end, hardwired +3V3 on the other) rather than a bare GPIO --
+# replicated below as JP11/JP12 so the enable line can be tied always-on
+# instead of firmware-controlled, same as 3.3.
+GEN = "/usr/share/kicad/symbols/Connector_Generic.kicad_sym"
+s.ensure_symbol(GEN, "Conn_01x03", "Connector_Generic:Conn_01x03")
+JUMPER3_FP = "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical_SMD_Pin1Left"
+
 FFC = "teacup-carrier:SFW15R-2STE1LF_C3167933"
-for ref, fy, pfx in (("J7", S(40), "MIPI0"), ("J8", S(100), "MIPI1")):
+for ref, jpref, fy, jpy, pfx in (
+    ("J7", "JP11", S(40), S(30), "MIPI0"),
+    ("J8", "JP12", S(100), S(90), "MIPI1"),
+):
     fx = S(150)
     s.place(FFC, ref, "SFW15R-2STE1LF", fx, fy, 0,
             footprint="teacup-carrier:FPC-SMD_15P-P1.00_SFW15R-2STE1LF",
             ref_at=(fx, fy - S(21), 0), value_at=(fx, fy + S(21), 0))
     ic_pins(FFC, fx, fy, {
-        1: GNDF, 2: f"{pfx}_GPIO", 3: f"{pfx}_SCCB_SDA", 4: f"{pfx}_SCCB_SCL",
-        5: P3V3F, 6: GNDF,
-        7: f"{pfx}_D0N", 8: f"{pfx}_D0P", 9: GNDF,
-        10: f"{pfx}_D1N", 11: f"{pfx}_D1P", 12: GNDF,
-        13: f"{pfx}_CLKN", 14: f"{pfx}_CLKP", 15: GNDF,
+        1: P3V3F, 2: f"{pfx}_SCCB_SDA", 3: f"{pfx}_SCCB_SCL", 4: P3V3F,
+        5: f"{pfx}_SENSOR_EN", 6: GNDF,
+        7: f"{pfx}_CLKP", 8: f"{pfx}_CLKN", 9: GNDF,
+        10: f"{pfx}_D1P", 11: f"{pfx}_D1N", 12: GNDF,
+        13: f"{pfx}_D0P", 14: f"{pfx}_D0N", 15: GNDF,
         # 16/17 mounting tabs unconnected
+    })
+
+    # sensor-enable select jumper (matches 3.3's J15): pin1=GPIO, pin2=the
+    # wiper that actually feeds the FPC's pin 5, pin3=+3V3.
+    jpx = S(185)
+    s.place("Connector_Generic:Conn_01x03", jpref, "EN_SEL", jpx, jpy, 0,
+            footprint=JUMPER3_FP,
+            ref_at=(jpx + S(4), jpy - S(2), 0), value_at=(jpx + S(4), jpy + S(2), 0))
+    ic_pins("Connector_Generic:Conn_01x03", jpx, jpy, {
+        "1": f"{pfx}_GPIO", "2": f"{pfx}_SENSOR_EN", "3": P3V3F,
     })
 
 out = s.render("Carrier Physical I O", str(uuid.uuid4()), "/1f26de08-f02d-4283-b132-5069c9b5ce98", "5", paper="A3")

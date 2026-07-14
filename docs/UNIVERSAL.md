@@ -905,11 +905,11 @@ no shared VBUS conductor to design around in the first place. Three named
   reverse): the pole (pin 3) is tied directly to `+5V_ALT` — no gating jumper
   (an earlier `JP1` provisioning jumper here is removed, §2's voltage-select
   jumpers now cover the risk it existed for) — throw
-  1 connects it to `EN_SW_BMC`, throw 4 connects it to `EN_SW_ALT`. **Force BMC**
-  (throw 1, forces the BMC branch on), **off / ESP32 control** (center,
+  1 connects it to `EN_SW_ALT`, throw 4 connects it to `EN_SW_BMC`. **Force ALT**
+  (throw 1, forces the ALT branch on), **off / ESP32 control** (center,
   neither throw engaged — both branches default off via their pulldowns,
   same safe idle state as before, and GPIOs retain full control from here),
-  **force ALT** (throw 4, forces the ALT branch on). Sourcing the pole from
+  **force BMC** (throw 4, forces the BMC branch on). Sourcing the pole from
   `+5V_ALT` rather than `+3V3_ALWAYS` is deliberate: it's what makes the
   force-ALT throw work with `J9` fully unplugged and the BMC branch
   unpowered, which is the scenario this override exists for in the first
@@ -1196,7 +1196,9 @@ handful of the 260 positions, already part of the SoC signal set (§8).
   with one throw tied to GND, which was electrically indistinguishable from
   center's own pulldown-default-low state whenever GPIO wasn't actively
   fighting it — effectively on-off-off). Now pole = `+5V_ALT` (fixed rail),
-  throw 1 = `EN_SW_BMC`, throw 4 = `EN_SW_ALT` — see §9.
+  throw 1 = `EN_SW_ALT`, throw 4 = `EN_SW_BMC` (swapped from the original
+  throw1=BMC/throw4=ALT assignment per explicit user direction, 2026-07-14)
+  — see §9.
 - **GPIO expander added (`U15`, TCA9555PWR) and 9 slow status/enable
   signals moved onto it**, freeing native ESP32 GPIOs for an ESP-Hosted SPI
   link — while deliberately keeping flash chip-select and power-domain

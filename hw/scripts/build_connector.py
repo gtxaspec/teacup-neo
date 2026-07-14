@@ -93,24 +93,38 @@ UNIT2 = {
     49: "GND", 50: "MSC0_CLK", 51: "GND",
     52: "MSC0_CMD", 53: "MSC0_D0", 54: "MSC0_D1", 55: "MSC0_D2", 56: "MSC0_D3_CD",
     57: "GND",
-    # Headphone -- sensitive analog, isolated on both sides.
-    58: "HPOUTL",
+    # Headphone moved down to the 170s (see UNIT4) to sit beside MICLP --
+    # geography-first (UNIVERSAL.md SS8: "audio by the codec block"), so
+    # both audio nets exit the socket already clustered instead of one
+    # sitting alone here. 58 folds into the existing GND bracket either
+    # side of it (57/59), same analog-isolation intent, now a solid block.
+    58: "GND",
     59: "GND",
     # MIPI0: GPIO/SCCB (low-speed control, no special isolation needed)
     # then each D-PHY differential pair gets its own GND immediately before
     # it, separating it from its neighbor -- the pair itself (N/P) stays
     # adjacent since splitting a differential pair with GND would break the
     # coupling it needs, not help it.
+    #
+    # Pair ORDER (CLK, then D1, then D0, P-before-N within each pair) is
+    # deliberately the same sequence J7's FFC connector uses (see
+    # build_io.py) -- that connector's own pin order is fixed to match
+    # TeaCup(C)3.3's real sensor pinout and can't move, so J1's order is
+    # the side that was free to change. Matching it here means the 8 MIPI0
+    # signals exit the socket already in the same relative order they need
+    # to arrive at the FFC, so they can be routed straight across without
+    # having to cross over each other (which is what forces vias). Per
+    # explicit user direction, 2026-07-13.
     60: "MIPI0_GPIO", 61: "MIPI0_SCCB_SDA", 62: "MIPI0_SCCB_SCL",
-    63: "GND", 64: "MIPI0_D0N", 65: "MIPI0_D0P",
-    66: "GND", 67: "MIPI0_D1N", 68: "MIPI0_D1P",
-    69: "GND", 70: "MIPI0_CLKN", 71: "MIPI0_CLKP",
+    63: "GND", 64: "MIPI0_CLKP", 65: "MIPI0_CLKN",
+    66: "GND", 67: "MIPI0_D1P", 68: "MIPI0_D1N",
+    69: "GND", 70: "MIPI0_D0P", 71: "MIPI0_D0N",
     72: "GND",
-    # MIPI1: same pattern.
+    # MIPI1: same pattern, same reasoning (matches J8's FFC pin order).
     73: "MIPI1_GPIO", 74: "MIPI1_SCCB_SDA", 75: "MIPI1_SCCB_SCL",
-    76: "GND", 77: "MIPI1_D0N", 78: "MIPI1_D0P",
-    79: "GND", 80: "MIPI1_D1N", 81: "MIPI1_D1P",
-    82: "GND", 83: "MIPI1_CLKN", 84: "MIPI1_CLKP",
+    76: "GND", 77: "MIPI1_CLKP", 78: "MIPI1_CLKN",
+    79: "GND", 80: "MIPI1_D1P", 81: "MIPI1_D1N",
+    82: "GND", 83: "MIPI1_D0P", 84: "MIPI1_D0N",
     85: "GND",
 }
 # ESP-Hosted's host-driven reset line -- ties straight to the BMC ESP32-S3's
@@ -203,7 +217,18 @@ UNIT4[152] = "GND"
 for i in range(16):
     UNIT4[153 + i] = f"GPIO{i}"
 UNIT4[169] = "GND"
-for p in range(170, 193):
+# P170-171 claimed for the audio pair (HPOUTL relocated down from unit 2's
+# old pin 58, MICLP for J6's mic signal per TeaCup(C)3.3's J10) -- geography
+# -first (UNIVERSAL.md SS8: "audio by the codec block"), clustered together
+# rather than HPOUTL sitting alone far from MICLP. GND on both sides (169,
+# 172) preserves the same "sensitive analog, isolated on both sides" intent
+# HPOUTL had at its old position. Carved out of the spare range the same
+# way every other named signal above already is, not left in the SPARE_P
+# breakout with the genuinely-unclaimed pins.
+UNIT4[170] = "HPOUTL"
+UNIT4[171] = "MICLP"
+UNIT4[172] = "GND"
+for p in range(173, 193):
     UNIT4[p] = f"SPARE_P{p}"
 
 for num, spec in UNIT4.items():

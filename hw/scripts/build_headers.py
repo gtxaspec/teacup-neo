@@ -46,6 +46,12 @@ CLUSTERS = [
     ("J22", "UART0", ["UART0_RXD", "UART0_TXD", "UART0_CTS", "UART0_RTS"]),
     ("J23", "UART2", ["UART2_RXD", "UART2_TXD", "UART2_CTS", "UART2_RTS"]),
     ("J24", "UART3", ["UART3_RXD", "UART3_TXD", "UART3_CTS", "UART3_RTS"]),
+    # UART1 is the BMC-ESP32<->J1 management/console link (build_bmc.py),
+    # previously carrier-internal only with no external monitoring point --
+    # broken out here too per explicit user direction so it can be probed
+    # externally, same as UART0/2/3. TX/RX only (no CTS/RTS exist on this
+    # link -- it's a plain 2-wire console UART, not flow-controlled).
+    ("J36", "UART1 (BMC console)", ["UART1_RX", "UART1_TX"]),
     ("J26", "SSI1", ["SSI1_CLK", "SSI1_DT", "SSI1_DR", "SSI1_CE0"]),
     ("J28", "SAR-ADC", ["SAR_AUX0"]),
     ("J29", "SMB0/SMB1 (general I2C)", ["SMB0_SDA", "SMB0_SCK", "SMB1_SDA", "SMB1_SCK"]),
@@ -59,7 +65,10 @@ CLUSTERS = [
 # spare) -- grouped by connector unit for traceability, not by any assumed
 # function, since these are genuinely undefined-purpose pins.
 SPARE_CLUSTERS = [
-    ("J31", "J1 SPARE (P170-192)", [f"SPARE_P{p}" for p in range(170, 193)]),
+    # P170-172 claimed for the HPOUTL/MICLP audio pair + its GND bracket
+    # (see build_connector.py) -- excluded here same as every other named
+    # signal, not left in the spare breakout.
+    ("J31", "J1 SPARE (P173-192)", [f"SPARE_P{p}" for p in range(173, 193)]),
     ("J32", "J1 SPARE (P193-216)", [f"SPARE_P{p}" for p in range(193, 217)]),
     ("J33", "J1 SPARE (P217-240)", [f"SPARE_P{p}" for p in range(217, 241)]),
     ("J34", "J1 SPARE (P241-264)", [f"SPARE_P{p}" for p in range(241, 265)]),
@@ -72,7 +81,7 @@ COLC_X = S(280)
 COLD_X = S(400)
 COL_X = {"A": COLA_X, "B": COLB_X, "C": COLC_X, "D": COLD_X}
 COL_ORDER = {"J20": "A", "J21": "A", "J25": "A", "J27": "A", "J30": "A",
-             "J22": "B", "J23": "B", "J24": "B", "J26": "B", "J28": "B", "J29": "B",
+             "J22": "B", "J23": "B", "J24": "B", "J26": "B", "J28": "B", "J29": "B", "J36": "B",
              "J31": "C", "J32": "C", "J33": "C",
              "J34": "D", "J35": "D"}
 

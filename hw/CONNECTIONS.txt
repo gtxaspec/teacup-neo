@@ -469,33 +469,33 @@ J1  (AH58893-T9B10-3F)
       pin   55  P55                  -> MSC0_D2
       pin   56  P56                  -> MSC0_D3_CD
       pin   57  P57                  -> GND
-      pin   58  P58                  -> HPOUTL
+      pin   58  P58                  -> GND
       pin   59  P59                  -> GND
       pin   60  P60                  -> MIPI0_GPIO
       pin   61  P61                  -> MIPI0_SCCB_SDA
       pin   62  P62                  -> MIPI0_SCCB_SCL
       pin   63  P63                  -> GND
-      pin   64  P64                  -> MIPI0_D0N
-      pin   65  P65                  -> MIPI0_D0P
+      pin   64  P64                  -> MIPI0_CLKP
+      pin   65  P65                  -> MIPI0_CLKN
       pin   66  P66                  -> GND
-      pin   67  P67                  -> MIPI0_D1N
-      pin   68  P68                  -> MIPI0_D1P
+      pin   67  P67                  -> MIPI0_D1P
+      pin   68  P68                  -> MIPI0_D1N
       pin   69  P69                  -> GND
-      pin   70  P70                  -> MIPI0_CLKN
-      pin   71  P71                  -> MIPI0_CLKP
+      pin   70  P70                  -> MIPI0_D0P
+      pin   71  P71                  -> MIPI0_D0N
       pin   72  P72                  -> GND
       pin   73  P73                  -> MIPI1_GPIO
       pin   74  P74                  -> MIPI1_SCCB_SDA
       pin   75  P75                  -> MIPI1_SCCB_SCL
       pin   76  P76                  -> GND
-      pin   77  P77                  -> MIPI1_D0N
-      pin   78  P78                  -> MIPI1_D0P
+      pin   77  P77                  -> MIPI1_CLKP
+      pin   78  P78                  -> MIPI1_CLKN
       pin   79  P79                  -> GND
-      pin   80  P80                  -> MIPI1_D1N
-      pin   81  P81                  -> MIPI1_D1P
+      pin   80  P80                  -> MIPI1_D1P
+      pin   81  P81                  -> MIPI1_D1N
       pin   82  P82                  -> GND
-      pin   83  P83                  -> MIPI1_CLKN
-      pin   84  P84                  -> MIPI1_CLKP
+      pin   83  P83                  -> MIPI1_D0P
+      pin   84  P84                  -> MIPI1_D0N
       pin   85  P85                  -> GND
       pin   86  P86                  -> HOSTED_RESET
       pin   87  P87                  -> GMAC0_MDIO
@@ -581,9 +581,9 @@ J1  (AH58893-T9B10-3F)
       pin  167  P167                 -> GPIO14
       pin  168  P168                 -> GPIO15
       pin  169  P169                 -> GND
-      pin  170  P170                 -> SPARE_P170
-      pin  171  P171                 -> SPARE_P171
-      pin  172  P172                 -> SPARE_P172
+      pin  170  P170                 -> HPOUTL
+      pin  171  P171                 -> MICLP
+      pin  172  P172                 -> GND
       pin  173  P173                 -> SPARE_P173
       pin  174  P174                 -> SPARE_P174
       pin  175  P175                 -> SPARE_P175
@@ -770,10 +770,10 @@ SW1  (SSSS711403)
 
 SW2  (SSSS711403)
       footprint: teacup-carrier:SW-TH_SSSS711403
-      pin    1                       -> EN_SW_BMC
+      pin    1                       -> EN_SW_ALT
       pin    2                       -> (not connected)
       pin    3                       -> +5V_ALT
-      pin    4                       -> EN_SW_ALT
+      pin    4                       -> EN_SW_BMC
       pin    5                       -> (not connected)
       pin    6                       -> (not connected)
 
@@ -971,48 +971,48 @@ J5  (Wuerth_694106301002)
 
 J6  (AudioJack4_Ground)
       footprint: Connector_Audio:Jack_3.5mm_PJ320D_Horizontal
-      pin    G                       -> GND
-      pin   R1                       -> (not connected)
-      pin   R2                       -> (not connected)
-      pin    S                       -> (not connected)
+      pin    G                       -> (not connected)
+      pin   R1                       -> HPOUTL
+      pin   R2                       -> GND
+      pin    S                       -> MICLP
       pin    T                       -> HPOUTL
 
 J7  (SFW15R-2STE1LF)
       footprint: teacup-carrier:FPC-SMD_15P-P1.00_SFW15R-2STE1LF
-      pin    1                       -> GND
-      pin    2                       -> MIPI0_GPIO
-      pin    3                       -> MIPI0_SCCB_SDA
-      pin    4                       -> MIPI0_SCCB_SCL
-      pin    5                       -> +3V3
+      pin    1                       -> +3V3
+      pin    2                       -> MIPI0_SCCB_SDA
+      pin    3                       -> MIPI0_SCCB_SCL
+      pin    4                       -> +3V3
+      pin    5                       -> MIPI0_SENSOR_EN
       pin    6                       -> GND
-      pin    7                       -> MIPI0_D0N
-      pin    8                       -> MIPI0_D0P
+      pin    7                       -> MIPI0_CLKP
+      pin    8                       -> MIPI0_CLKN
       pin    9                       -> GND
-      pin   10                       -> MIPI0_D1N
-      pin   11                       -> MIPI0_D1P
+      pin   10                       -> MIPI0_D1P
+      pin   11                       -> MIPI0_D1N
       pin   12                       -> GND
-      pin   13                       -> MIPI0_CLKN
-      pin   14                       -> MIPI0_CLKP
+      pin   13                       -> MIPI0_D0P
+      pin   14                       -> MIPI0_D0N
       pin   15                       -> GND
       pin   16                       -> (not connected)
       pin   17                       -> (not connected)
 
 J8  (SFW15R-2STE1LF)
       footprint: teacup-carrier:FPC-SMD_15P-P1.00_SFW15R-2STE1LF
-      pin    1                       -> GND
-      pin    2                       -> MIPI1_GPIO
-      pin    3                       -> MIPI1_SCCB_SDA
-      pin    4                       -> MIPI1_SCCB_SCL
-      pin    5                       -> +3V3
+      pin    1                       -> +3V3
+      pin    2                       -> MIPI1_SCCB_SDA
+      pin    3                       -> MIPI1_SCCB_SCL
+      pin    4                       -> +3V3
+      pin    5                       -> MIPI1_SENSOR_EN
       pin    6                       -> GND
-      pin    7                       -> MIPI1_D0N
-      pin    8                       -> MIPI1_D0P
+      pin    7                       -> MIPI1_CLKP
+      pin    8                       -> MIPI1_CLKN
       pin    9                       -> GND
-      pin   10                       -> MIPI1_D1N
-      pin   11                       -> MIPI1_D1P
+      pin   10                       -> MIPI1_D1P
+      pin   11                       -> MIPI1_D1N
       pin   12                       -> GND
-      pin   13                       -> MIPI1_CLKN
-      pin   14                       -> MIPI1_CLKP
+      pin   13                       -> MIPI1_D0P
+      pin   14                       -> MIPI1_D0N
       pin   15                       -> GND
       pin   16                       -> (not connected)
       pin   17                       -> (not connected)
@@ -1036,6 +1036,18 @@ J9  (TYPE-C-31-M-12)
       pin   B8  SBU2                 -> (not connected)
       pin   B9  VBUS                 -> +5V_BMC
       pin   S1  SHIELD               -> GND
+
+JP11  (EN_SEL)
+      footprint: Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical_SMD_Pin1Left
+      pin    1  Pin_1                -> MIPI0_GPIO
+      pin    2  Pin_2                -> MIPI0_SENSOR_EN
+      pin    3  Pin_3                -> +3V3
+
+JP12  (EN_SEL)
+      footprint: Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical_SMD_Pin1Left
+      pin    1  Pin_1                -> MIPI1_GPIO
+      pin    2  Pin_2                -> MIPI1_SENSOR_EN
+      pin    3  Pin_3                -> +3V3
 
 Q1  (AO3401A)
       footprint: Package_TO_SOT_SMD:SOT-23
@@ -1213,31 +1225,29 @@ J30  (HDR_J30)
       pin   18  Pin_18               -> GND
 
 J31  (HDR_J31)
-      footprint: Connector_PinHeader_2.54mm:PinHeader_2x12_P2.54mm_Vertical
+      footprint: Connector_PinHeader_2.54mm:PinHeader_2x11_P2.54mm_Vertical
       pin    1  Pin_1                -> GND
-      pin    2  Pin_2                -> SPARE_P170
-      pin    3  Pin_3                -> SPARE_P171
-      pin    4  Pin_4                -> SPARE_P172
-      pin    5  Pin_5                -> SPARE_P173
-      pin    6  Pin_6                -> SPARE_P174
-      pin    7  Pin_7                -> SPARE_P175
-      pin    8  Pin_8                -> SPARE_P176
-      pin    9  Pin_9                -> SPARE_P177
-      pin   10  Pin_10               -> SPARE_P178
-      pin   11  Pin_11               -> SPARE_P179
-      pin   12  Pin_12               -> SPARE_P180
-      pin   13  Pin_13               -> SPARE_P181
-      pin   14  Pin_14               -> SPARE_P182
-      pin   15  Pin_15               -> SPARE_P183
-      pin   16  Pin_16               -> SPARE_P184
-      pin   17  Pin_17               -> SPARE_P185
-      pin   18  Pin_18               -> SPARE_P186
-      pin   19  Pin_19               -> SPARE_P187
-      pin   20  Pin_20               -> SPARE_P188
-      pin   21  Pin_21               -> SPARE_P189
-      pin   22  Pin_22               -> SPARE_P190
-      pin   23  Pin_23               -> SPARE_P191
-      pin   24  Pin_24               -> SPARE_P192
+      pin    2  Pin_2                -> SPARE_P173
+      pin    3  Pin_3                -> SPARE_P174
+      pin    4  Pin_4                -> SPARE_P175
+      pin    5  Pin_5                -> SPARE_P176
+      pin    6  Pin_6                -> SPARE_P177
+      pin    7  Pin_7                -> SPARE_P178
+      pin    8  Pin_8                -> SPARE_P179
+      pin    9  Pin_9                -> SPARE_P180
+      pin   10  Pin_10               -> SPARE_P181
+      pin   11  Pin_11               -> SPARE_P182
+      pin   12  Pin_12               -> SPARE_P183
+      pin   13  Pin_13               -> SPARE_P184
+      pin   14  Pin_14               -> SPARE_P185
+      pin   15  Pin_15               -> SPARE_P186
+      pin   16  Pin_16               -> SPARE_P187
+      pin   17  Pin_17               -> SPARE_P188
+      pin   18  Pin_18               -> SPARE_P189
+      pin   19  Pin_19               -> SPARE_P190
+      pin   20  Pin_20               -> SPARE_P191
+      pin   21  Pin_21               -> SPARE_P192
+      pin   22  Pin_22               -> GND
 
 J32  (HDR_J32)
       footprint: Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical
@@ -1354,4 +1364,10 @@ J35  (HDR_J35)
       pin   24  Pin_24               -> SPARE_P287
       pin   25  Pin_25               -> SPARE_P288
       pin   26  Pin_26               -> GND
+
+J36  (HDR_J36)
+      footprint: Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical
+      pin    1  Pin_1                -> GND
+      pin    2  Pin_2                -> UART1_RX
+      pin    3  Pin_3                -> UART1_TX
 
