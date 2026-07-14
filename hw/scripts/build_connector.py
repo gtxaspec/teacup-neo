@@ -54,23 +54,24 @@ UNIT1 = {
     28: "SFC_CS", 29: "SFC_CLK",
     30: "SFC_IO0", 31: "SFC_IO1", 32: "SFC_IO2", 33: "SFC_IO3",
     34: "UART1_TX", 35: "UART1_RX",
-    36: "GND", 37: "GND", 38: "GND", 39: "GND", 40: "GND",
+    36: "GND", 37: "GND", 38: "GND", 39: "GND",
 }
-# Pins 41-48: explicitly reserved -- the per-SoC GPIO/peripheral superset
+# Pins 40-48: explicitly reserved -- the per-SoC GPIO/peripheral superset
 # mapping is a separate task (docs/UNIVERSAL.md SS8 geography-first rule);
 # labeled placeholders keep them visible without inventing assignments.
-for p in range(41, 49):
+for p in range(40, 49):
     UNIT1[p] = f"RESERVED_P{p}"
-# 41/42 carry the shared USB host data pair (J2 alt-USB-C + J3 USB-A, same
+# 40/41 carry the shared USB host data pair (J2 alt-USB-C + J3 USB-A, same
 # logical port) across to the interposer SoC -- placed next to the pin
-# 36-40 GND run for flanking. Not RESERVED: these are live global nets.
-UNIT1[41] = "USBA_HOST_DP"
-UNIT1[42] = "USBA_HOST_DM"
-# 43-48: ESP-Hosted full-duplex SPI (BMC ESP32-S3 -> interposer SoC), using
-# up the last of unit 1's reserved pins. No spare pins left for GND
-# flanking here (unit 1 is now fully populated); the pin 36-40 GND run
-# sits 1-3 positions away, which is what real physical adjacency on the
-# connector allows -- same caveat as the MIPI/MSC0 crossing.
+# 36-39 GND run for flanking. Not RESERVED: these are live global nets.
+UNIT1[40] = "USBA_HOST_DP"
+UNIT1[41] = "USBA_HOST_DM"
+# 42-48: ESP-Hosted full-duplex SPI + reset (BMC ESP32-S3 <-> interposer
+# SoC), now one contiguous block -- HOSTED_RESET used to sit alone at
+# unit 2 pin 86 (see there for why), far from its own SPI/handshake
+# siblings; moved here next to them per explicit user direction,
+# 2026-07-15.
+UNIT1[42] = "HOSTED_RESET"
 UNIT1[43] = "HOSTED_SPI_CLK"
 UNIT1[44] = "HOSTED_SPI_MOSI"
 UNIT1[45] = "HOSTED_SPI_MISO"
@@ -87,11 +88,18 @@ s.place(CONN, "J1", "AH58893-T9B10-3F", u2x, u2y, 0, unit=2,
         ref_at=(u2x, u2y - S(26), 0), value_at=(u2x, u2y + S(26), 0))
 
 UNIT2 = {
-    # microSD bus -- GND bracketing the whole group, plus CLK specifically
-    # sandwiched between two GND pins for a clean return path on the
-    # highest-frequency single-ended line in this group.
-    49: "GND", 50: "MSC0_CLK", 51: "GND",
-    52: "MSC0_CMD", 53: "MSC0_D0", 54: "MSC0_D1", 55: "MSC0_D2", 56: "MSC0_D3_CD",
+    # microSD bus -- GND still brackets the whole group, but the 6 signal
+    # slots now follow J4's own pin order *as laid out left-to-right on
+    # the real board*, not J4's raw pin-number order -- J4 sits mirrored
+    # relative to J1 there (J1's pins increase left-to-right; J4's
+    # increase right-to-left), so matching by pin number alone actually
+    # produced a fully-crossed assignment (caught after the fact by
+    # comparing real pad x-coordinates). Left-to-right on both connectors
+    # is D1, D0, CLK, CMD, D3_CD, D2 (J4 pins 8,7,5,3,2,1) -- matching
+    # that instead of J4's 1,2,3,5,7,8 is what actually keeps J1<->J4
+    # routing straight, the same intent as MIPI0/MIPI1 matching J7/J8.
+    49: "GND", 50: "MSC0_D1", 51: "GND",
+    52: "MSC0_D0", 53: "MSC0_CLK", 54: "MSC0_CMD", 55: "MSC0_D3_CD", 56: "MSC0_D2",
     57: "GND",
     # Headphone moved down to the 170s (see UNIT4) to sit beside MICLP --
     # geography-first (UNIVERSAL.md SS8: "audio by the codec block"), so
@@ -121,16 +129,20 @@ UNIT2 = {
     69: "GND", 70: "MIPI0_D0P", 71: "MIPI0_D0N",
     72: "GND",
     # MIPI1: same pattern, same reasoning (matches J8's FFC pin order).
-    73: "MIPI1_GPIO", 74: "MIPI1_SCCB_SDA", 75: "MIPI1_SCCB_SCL",
+    # 73-75 rotated left by one (SDA/SCL/GPIO instead of GPIO/SDA/SCL) per
+    # explicit user direction, 2026-07-15.
+    73: "MIPI1_SCCB_SDA", 74: "MIPI1_SCCB_SCL", 75: "MIPI1_GPIO",
     76: "GND", 77: "MIPI1_CLKP", 78: "MIPI1_CLKN",
     79: "GND", 80: "MIPI1_D1P", 81: "MIPI1_D1N",
     82: "GND", 83: "MIPI1_D0P", 84: "MIPI1_D0N",
     85: "GND",
 }
-# ESP-Hosted's host-driven reset line -- ties straight to the BMC ESP32-S3's
-# own EN/RST pin (HOSTED_RESET on the bmc sheet), not a GPIO. Host side must
-# drive it open-drain (only pulls low) so it doesn't fight R8's pull-up.
-UNIT2[86] = "HOSTED_RESET"
+# HOSTED_RESET used to live here -- it was added after unit 1 was already
+# fully populated (see the 43-48 comment there), so it landed on the next
+# free pin rather than beside its own HOSTED_SPI_* siblings; moved to
+# unit 1 pin 42 per explicit user direction, 2026-07-15. Pin 86 is now
+# GND (rather than staying reserved), per explicit user direction.
+UNIT2[86] = "GND"
 # 87-96: primary GMAC (RGMII, T-series MAC position -- T31/T40 reduced
 # 2-bit-per-direction convention per their own GPIO mux tables, not full
 # 4-bit RGMII) -- exactly fills what was RESERVED_P87-96, first of the

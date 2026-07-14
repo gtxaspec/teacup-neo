@@ -451,9 +451,9 @@ J1  (AH58893-T9B10-3F)
       pin   37  P37                  -> GND
       pin   38  P38                  -> GND
       pin   39  P39                  -> GND
-      pin   40  P40                  -> GND
-      pin   41  P41                  -> USBA_HOST_DP
-      pin   42  P42                  -> USBA_HOST_DM
+      pin   40  P40                  -> USBA_HOST_DP
+      pin   41  P41                  -> USBA_HOST_DM
+      pin   42  P42                  -> HOSTED_RESET
       pin   43  P43                  -> HOSTED_SPI_CLK
       pin   44  P44                  -> HOSTED_SPI_MOSI
       pin   45  P45                  -> HOSTED_SPI_MISO
@@ -461,13 +461,13 @@ J1  (AH58893-T9B10-3F)
       pin   47  P47                  -> HOSTED_HANDSHAKE
       pin   48  P48                  -> HOSTED_DATA_READY
       pin   49  P49                  -> GND
-      pin   50  P50                  -> MSC0_CLK
+      pin   50  P50                  -> MSC0_D1
       pin   51  P51                  -> GND
-      pin   52  P52                  -> MSC0_CMD
-      pin   53  P53                  -> MSC0_D0
-      pin   54  P54                  -> MSC0_D1
-      pin   55  P55                  -> MSC0_D2
-      pin   56  P56                  -> MSC0_D3_CD
+      pin   52  P52                  -> MSC0_D0
+      pin   53  P53                  -> MSC0_CLK
+      pin   54  P54                  -> MSC0_CMD
+      pin   55  P55                  -> MSC0_D3_CD
+      pin   56  P56                  -> MSC0_D2
       pin   57  P57                  -> GND
       pin   58  P58                  -> GND
       pin   59  P59                  -> GND
@@ -484,9 +484,9 @@ J1  (AH58893-T9B10-3F)
       pin   70  P70                  -> MIPI0_D0P
       pin   71  P71                  -> MIPI0_D0N
       pin   72  P72                  -> GND
-      pin   73  P73                  -> MIPI1_GPIO
-      pin   74  P74                  -> MIPI1_SCCB_SDA
-      pin   75  P75                  -> MIPI1_SCCB_SCL
+      pin   73  P73                  -> MIPI1_SCCB_SDA
+      pin   74  P74                  -> MIPI1_SCCB_SCL
+      pin   75  P75                  -> MIPI1_GPIO
       pin   76  P76                  -> GND
       pin   77  P77                  -> MIPI1_CLKP
       pin   78  P78                  -> MIPI1_CLKN
@@ -497,7 +497,7 @@ J1  (AH58893-T9B10-3F)
       pin   83  P83                  -> MIPI1_D0P
       pin   84  P84                  -> MIPI1_D0N
       pin   85  P85                  -> GND
-      pin   86  P86                  -> HOSTED_RESET
+      pin   86  P86                  -> GND
       pin   87  P87                  -> GMAC0_MDIO
       pin   88  P88                  -> GMAC0_MDCK
       pin   89  P89                  -> GMAC0_TXCLK
