@@ -1,0 +1,34 @@
+(version 1)
+
+# T31ZX (IC1) is a 0.35mm-pitch QFN with only 0.20mm of actual
+# copper-to-copper gap between adjacent same-row pads (0.35mm pitch -
+# 0.15mm pad width). The board-wide rules (0.15mm clearance, 0.2mm min
+# track width) can't fit anything in that gap at all. This rule relaxes
+# both, but only inside the "underT31" rule area (see build_pcb.py /
+# add_t31_rule_area.py) placed around IC1's courtyard plus its
+# immediate escape-fanout region -- the rest of the board keeps the
+# normal rules.
+#
+# Even at these tighter values (0.05mm clearance, 0.1mm min track
+# width -> 0.05+0.1+0.05 = 0.20mm, exactly the available gap with zero
+# margin), threading a trace directly between two adjacent same-row
+# pins is right at the physical/fab limit. The realistic escape
+# strategy is a via immediately at or beside each pad (not routed
+# between two different pads) fanning out to an inner layer, same
+# technique already used for the carrier's own dense J1 breakout --
+# this rule just makes short stubs and vias in the immediate vicinity
+# of the QFN legal, it doesn't by itself make inter-pin routing easy.
+# Per explicit user direction, 2026-07-18.
+(rule "T31_finepitch_clearance"
+	(condition "A.intersectsArea('underT31')")
+	(constraint clearance (min 0.05mm))
+)
+(rule "T31_finepitch_track_width"
+	(condition "A.intersectsArea('underT31')")
+	(constraint track_width (min 0.1mm) (opt 0.1mm))
+)
+(rule "T31_finepitch_via"
+	(condition "A.intersectsArea('underT31')")
+	(constraint via_diameter (min 0.3mm))
+	(constraint hole_size (min 0.15mm))
+)

@@ -1,0 +1,289 @@
+finger,carrier_net,t31_pin,t31_pin_name_or_note
+1,VCORE,,SoC core/DDR rail (bidirectional)
+2,VCORE,,SoC core/DDR rail (bidirectional)
+3,VCORE,,SoC core/DDR rail (bidirectional)
+4,VCORE,,SoC core/DDR rail (bidirectional)
+5,GND,,GND
+6,MICLP,41,MICLP
+7,HPOUTL,44,HPOUTL
+8,GND,,GND
+9,VDDR,,SoC core/DDR rail (bidirectional)
+10,VDDR,,SoC core/DDR rail (bidirectional)
+11,GND,,GND
+12,GND,,GND
+13,+3V3,,carrier-sourced rail
+14,+3V3,,carrier-sourced rail
+15,+1V8,,carrier-sourced rail
+16,+1V8,,carrier-sourced rail
+17,+5V_SW,,carrier-sourced rail
+18,+5V_SW,,carrier-sourced rail
+19,GND,,GND
+20,USBA_HOST_DP,36,USB0PP
+21,USBA_HOST_DM,35,USB0PN
+22,GND,,GND
+23,VCORE_SNS,,"BMC-only (crosses to U8, not the interposer SoC)"
+24,HOSTED_DATA_READY,,"BMC-only (crosses to U8, not the interposer SoC)"
+25,HOSTED_HANDSHAKE,,"BMC-only (crosses to U8, not the interposer SoC)"
+26,HOSTED_SPI_CS,,"BMC-only (crosses to U8, not the interposer SoC)"
+27,HOSTED_SPI_MISO,,"BMC-only (crosses to U8, not the interposer SoC)"
+28,SFC_IO2,,"BMC-only (crosses to U8, not the interposer SoC)"
+29,SFC_IO1,,"BMC-only (crosses to U8, not the interposer SoC)"
+30,SFC_CLK,,"BMC-only (crosses to U8, not the interposer SoC)"
+31,SFC_IO0,,"BMC-only (crosses to U8, not the interposer SoC)"
+32,SFC_CS,,"BMC-only (crosses to U8, not the interposer SoC)"
+33,SFC_IO3,,"BMC-only (crosses to U8, not the interposer SoC)"
+34,RESET_EN,,"BMC-only (crosses to U8, not the interposer SoC)"
+35,BOOTSEL,,"BMC-only (crosses to U8, not the interposer SoC)"
+36,GND,,GND
+37,GND,,GND
+38,GND,,GND
+39,GND,,GND
+40,GND,,GND
+41,GND,,GND
+42,UART1_RX,,"BMC-only (crosses to U8, not the interposer SoC)"
+43,UART1_TX,,"BMC-only (crosses to U8, not the interposer SoC)"
+44,HOSTED_SPI_MOSI,,"BMC-only (crosses to U8, not the interposer SoC)"
+45,HOSTED_SPI_CLK,,"BMC-only (crosses to U8, not the interposer SoC)"
+46,I2C_ID_SCL,,"BMC-only (crosses to U8, not the interposer SoC)"
+47,I2C_ID_SDA,,"BMC-only (crosses to U8, not the interposer SoC)"
+48,HOSTED_RESET,,"BMC-only (crosses to U8, not the interposer SoC)"
+49,GND,,GND
+50,MSC0_D1,49,MSC0_D1_SSI_SLV_DR_PB01
+51,GND,,GND
+52,MSC0_D0,50,MSC0_D0_SSI_SLV_DT_PB00
+53,MSC0_CLK,51,MSC0_CLK_SSI_SLV_CLK_PB04
+54,MSC0_CMD,52,MSC0_CMD_SSI_SLV_CE0_PB05
+55,MSC0_D3_CD,53,MSC0_D3_PB03
+56,MSC0_D2,54,MSC0_D2_PB02
+57,GND,,GND
+58,GND,,GND
+59,GND,,GND
+60,MIPI0_SCCB_SDA,,not present on T31ZX
+61,MIPI0_SCCB_SCL,,not present on T31ZX
+62,MIPI0_GPIO,16,SA1_DVP_MCLK_PA15
+63,GND,,GND
+64,MIPI0_CLKP,27,MIPI_CLKP_DVP_D2
+65,MIPI0_CLKN,26,MIPI_CLKN_DVP_D3
+66,GND,,GND
+67,MIPI0_D1P,29,MIPI_DATAP1_DVP_D0
+68,MIPI0_D1N,28,MIPI_DATAN1_DVP_D1
+69,GND,,GND
+70,MIPI0_D0P,25,MIPI_DATAP0_DVP_D4
+71,MIPI0_D0N,24,MIPI_DATAN0_DVP_D5
+72,GND,,GND
+73,MIPI1_SCCB_SDA,,not present on T31ZX
+74,MIPI1_SCCB_SCL,,not present on T31ZX
+75,MIPI1_GPIO,,not present on T31ZX
+76,GND,,GND
+77,MIPI1_CLKP,,not present on T31ZX
+78,MIPI1_CLKN,,not present on T31ZX
+79,GND,,GND
+80,MIPI1_D1P,,not present on T31ZX
+81,MIPI1_D1N,,not present on T31ZX
+82,GND,,GND
+83,MIPI1_D0P,,not present on T31ZX
+84,MIPI1_D0N,,not present on T31ZX
+85,GND,,GND
+86,GND,,GND
+87,GMAC0_MDIO,57,GMAC_MDIO_MSC1_D1_SLCD_D5_PB11
+88,GMAC0_MDCK,58,GMAC_MDCK_MSC1_D0_I2S_SDTO_SLCD_D4_PB10
+89,GMAC0_TXCLK,62,GMAC_TXCLK_SLCD_D0_PB06
+90,GMAC0_PHYCLK,63,GMAC_PHY_CLK_SLCD_D1_PB07
+91,GMAC0_TXEN,66,GMAC_TXEN_MSC1_CLK_I2S_ADC_MCLK_SLCD_D2_PB08
+92,GMAC0_TXD0,64,GMAC_TXD0_MSC1_D2_I2S_ADC_LRCK_SLCD_D6_PB13
+93,GMAC0_TXD1,65,GMAC_TXD1_MSC1_D3_I2S_DAC_MCLK_SLCD_D7_PB14
+94,GMAC0_RXDV,59,GMAC_RXDV_MSC1_CMD_I2S_SDTI_SLCD_D3_PB09
+95,GMAC0_RXD0,60,GMAC_RXD0_I2S_DAC_LRCK_SLCD_WR_PB15/_SFC_CE1_PA26
+96,GMAC0_RXD1,61,GMAC_RXD1_SLCD_TE_PB16/_SFC_GPC_PA25
+97,GND,,GND
+98,UART0_RXD,71,UART0_RXD_TDI_PB19
+99,UART0_TXD,70,UART0_TXD_TDO_SLCD_RDY_PB22
+100,UART0_CTS,69,UART0_CTS_I2S_ADC_BCLK_SLCD_CS_PB20
+101,UART0_RTS,68,UART0_RTS_I2S_DAC_BCLK_SLCD_DC_PB21
+102,GND,,GND
+103,UART2_RXD,18,SD5_DVP_D11_UART2_RXD_MSC1_D3_PA11
+104,UART2_TXD,19,SD4_DVP_D10_UART2_TXD_MSC1_D2_PA10
+105,UART2_CTS,21,SD2_DVP_D8_UART2_CTS_MSC1_D0_PA08
+106,UART2_RTS,20,SD3_DVP_D9_UART2_RTS_MSC1_D1_PA09
+107,GND,,GND
+108,UART3_RXD,,not present on T31ZX
+109,UART3_TXD,,not present on T31ZX
+110,UART3_CTS,,not present on T31ZX
+111,UART3_RTS,,not present on T31ZX
+112,GND,,GND
+113,GMAC1_MDIO,,not present on T31ZX
+114,GMAC1_MDCK,,not present on T31ZX
+115,GMAC1_TXCLK,,not present on T31ZX
+116,GMAC1_PHYCLK,,not present on T31ZX
+117,GMAC1_TXEN,,not present on T31ZX
+118,GMAC1_TXD0,,not present on T31ZX
+119,GMAC1_TXD1,,not present on T31ZX
+120,GMAC1_RXDV,,not present on T31ZX
+121,GMAC1_RXD0,,not present on T31ZX
+122,GMAC1_RXD1,,not present on T31ZX
+123,GND,,GND
+124,SSI0_CLK,48,SFC_CLK_PA27
+125,SSI0_DT,47,SFC_DT_PA23
+126,SSI0_DR,46,SFC_DR_PA24
+127,SSI0_CE0,45,SFC_CE0_PA28
+128,SSI0_CE1,,no T31 pin available (lost to a higher-priority function)
+129,SSI0_GPC,,no T31 pin available (lost to a higher-priority function)
+130,GND,,GND
+131,SSI1_CLK,82,SSI1_CLK_DMIC_DAT0_PB29
+132,SSI1_DT,,no T31 pin available (lost to a higher-priority function)
+133,SSI1_DR,,no T31 pin available (lost to a higher-priority function)
+134,SSI1_CE0,81,SSI1_CE0_DMIC_DAT1_PB30
+135,GND,,GND
+136,PWM0,1,PWM0_SSI1_DT_PB17
+137,PWM1,2,PWM1_SSI1_DR_PB18
+138,PWM2,86,PWM2_SSI1_DT_DRV_VBUS_PB27
+139,PWM3,85,PWM3_SSI1_DR_DMIC_CLK_PB28
+140,PWM4,,not present on T31ZX
+141,PWM5,,not present on T31ZX
+142,PWM6,,not present on T31ZX
+143,PWM7,,not present on T31ZX
+144,GND,,GND
+145,GND,,GND
+146,SAR_AUX0,32,ADC_AUX0
+147,GND,,GND
+148,SMB0_SDA,13,SD6_SMB0_SDA_PA12
+149,SMB0_SCK,12,SD7_SMB0_SCK_PA13
+150,SMB1_SDA,88,SMB1_SDA_SSI1_CE0_PB25
+151,SMB1_SCK,87,SMB1_SCK_SSI1_CLK_PB26
+152,GND,,GND
+153,GPIO0,80,GPIO_PB31
+154,GPIO1,,not present on T31ZX
+155,GPIO2,,not present on T31ZX
+156,GPIO3,,not present on T31ZX
+157,GPIO4,,not present on T31ZX
+158,GPIO5,,not present on T31ZX
+159,GPIO6,,not present on T31ZX
+160,GPIO7,,not present on T31ZX
+161,GPIO8,,not present on T31ZX
+162,GPIO9,,not present on T31ZX
+163,GPIO10,,not present on T31ZX
+164,GPIO11,,not present on T31ZX
+165,GPIO12,,not present on T31ZX
+166,GPIO13,,not present on T31ZX
+167,GPIO14,,not present on T31ZX
+168,GPIO15,,not present on T31ZX
+169,GND,,GND
+170,GND,,GND
+171,GND,,GND
+172,GND,,GND
+173,SPARE_P173,7,"PPRST_ (PPRST_ (warm reset, no predefined carrier net))"
+174,SPARE_P174,8,"EFUSE_AVD (EFUSE_AVD (per explicit user direction -- broken out, not grounded))"
+175,SPARE_P175,11,"SA2_PA18 (PA18 (free pin, no predefined net))"
+176,SPARE_P176,17,"SA0_DVP_PCLK_PWM0_PA14 (PWM0 alt-location, unneeded (PWM0 already at pin1))"
+177,SPARE_P177,22,SD1_DVP_D7_UART1_RXD_PA07 (native UART1_RXD (J1 UART1_RX goes to BMC instead))
+178,SPARE_P178,23,SD0_DVP6_UART1_TXD_PA06 (native UART1_TXD (J1 UART1_TX goes to BMC instead))
+179,SPARE_P179,67,BOOT_SEL0_PC00 (T31's own BOOT_SEL0 strap (distinct from BMC's BOOTSEL))
+180,SPARE_P180,73,UART1_RXD_TMS_PB24 (native UART1_RXD alt-location / TMS (JTAG))
+181,SPARE_P181,74,UART1_TXD_TCK_PB23 (native UART1_TXD alt-location / TCK (JTAG))
+182,SPARE_P182,,unused on this module
+183,SPARE_P183,,unused on this module
+184,SPARE_P184,,unused on this module
+185,SPARE_P185,,unused on this module
+186,SPARE_P186,,unused on this module
+187,SPARE_P187,,unused on this module
+188,SPARE_P188,,unused on this module
+189,SPARE_P189,,unused on this module
+190,SPARE_P190,,unused on this module
+191,SPARE_P191,,unused on this module
+192,SPARE_P192,,unused on this module
+193,SPARE_P193,,unused on this module
+194,SPARE_P194,,unused on this module
+195,SPARE_P195,,unused on this module
+196,SPARE_P196,,unused on this module
+197,SPARE_P197,,unused on this module
+198,SPARE_P198,,unused on this module
+199,SPARE_P199,,unused on this module
+200,SPARE_P200,,unused on this module
+201,SPARE_P201,,unused on this module
+202,SPARE_P202,,unused on this module
+203,SPARE_P203,,unused on this module
+204,SPARE_P204,,unused on this module
+205,SPARE_P205,,unused on this module
+206,SPARE_P206,,unused on this module
+207,SPARE_P207,,unused on this module
+208,SPARE_P208,,unused on this module
+209,SPARE_P209,,unused on this module
+210,SPARE_P210,,unused on this module
+211,SPARE_P211,,unused on this module
+212,SPARE_P212,,unused on this module
+213,SPARE_P213,,unused on this module
+214,SPARE_P214,,unused on this module
+215,SPARE_P215,,unused on this module
+216,SPARE_P216,,unused on this module
+217,SPARE_P217,,unused on this module
+218,SPARE_P218,,unused on this module
+219,SPARE_P219,,unused on this module
+220,SPARE_P220,,unused on this module
+221,SPARE_P221,,unused on this module
+222,SPARE_P222,,unused on this module
+223,SPARE_P223,,unused on this module
+224,SPARE_P224,,unused on this module
+225,SPARE_P225,,unused on this module
+226,SPARE_P226,,unused on this module
+227,SPARE_P227,,unused on this module
+228,SPARE_P228,,unused on this module
+229,SPARE_P229,,unused on this module
+230,SPARE_P230,,unused on this module
+231,SPARE_P231,,unused on this module
+232,SPARE_P232,,unused on this module
+233,SPARE_P233,,unused on this module
+234,SPARE_P234,,unused on this module
+235,SPARE_P235,,unused on this module
+236,SPARE_P236,,unused on this module
+237,SPARE_P237,,unused on this module
+238,SPARE_P238,,unused on this module
+239,SPARE_P239,,unused on this module
+240,SPARE_P240,,unused on this module
+241,SPARE_P241,,unused on this module
+242,SPARE_P242,,unused on this module
+243,SPARE_P243,,unused on this module
+244,SPARE_P244,,unused on this module
+245,SPARE_P245,,unused on this module
+246,SPARE_P246,,unused on this module
+247,SPARE_P247,,unused on this module
+248,SPARE_P248,,unused on this module
+249,SPARE_P249,,unused on this module
+250,SPARE_P250,,unused on this module
+251,SPARE_P251,,unused on this module
+252,SPARE_P252,,unused on this module
+253,SPARE_P253,,unused on this module
+254,SPARE_P254,,unused on this module
+255,SPARE_P255,,unused on this module
+256,SPARE_P256,,unused on this module
+257,SPARE_P257,,unused on this module
+258,SPARE_P258,,unused on this module
+259,SPARE_P259,,unused on this module
+260,SPARE_P260,,unused on this module
+261,SPARE_P261,,unused on this module
+262,SPARE_P262,,unused on this module
+263,SPARE_P263,,unused on this module
+264,SPARE_P264,,unused on this module
+265,SPARE_P265,,unused on this module
+266,SPARE_P266,,unused on this module
+267,SPARE_P267,,unused on this module
+268,SPARE_P268,,unused on this module
+269,SPARE_P269,,unused on this module
+270,SPARE_P270,,unused on this module
+271,SPARE_P271,,unused on this module
+272,SPARE_P272,,unused on this module
+273,SPARE_P273,,unused on this module
+274,SPARE_P274,,unused on this module
+275,SPARE_P275,,unused on this module
+276,SPARE_P276,,unused on this module
+277,SPARE_P277,,unused on this module
+278,SPARE_P278,,unused on this module
+279,SPARE_P279,,unused on this module
+280,SPARE_P280,,unused on this module
+281,SPARE_P281,,unused on this module
+282,SPARE_P282,,unused on this module
+283,MSC1_CLK,15,CS2_DVP_HSYNC_SMB1_SDA_MSC1_CLK_PA16
+284,MSC1_CMD,14,RD_DVP_VSYNC_SMB1_SCK_MSC1_CMD_PA17
+285,MSC1_D0,,no T31 pin available (lost to a higher-priority function)
+286,MSC1_D1,,no T31 pin available (lost to a higher-priority function)
+287,MSC1_D2,,no T31 pin available (lost to a higher-priority function)
+288,MSC1_D3_CD,,no T31 pin available (lost to a higher-priority function)

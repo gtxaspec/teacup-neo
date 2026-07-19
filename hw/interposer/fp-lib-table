@@ -1,0 +1,9 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "teacup-interposer")(type "KiCad")(uri "${KIPRJMOD}/teacup-interposer.pretty")(options "")(descr "Teacup interposer (T31ZX reference) - custom footprints"))
+  (lib (name "Crystal")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Crystal.pretty")(options "")(descr ""))
+  (lib (name "Resistor_SMD")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Resistor_SMD.pretty")(options "")(descr ""))
+  (lib (name "Capacitor_SMD")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Capacitor_SMD.pretty")(options "")(descr ""))
+  (lib (name "Package_SO")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Package_SO.pretty")(options "")(descr ""))
+  (lib (name "TestPoint")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/TestPoint.pretty")(options "")(descr ""))
+)
